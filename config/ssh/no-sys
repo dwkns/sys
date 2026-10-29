@@ -8,4 +8,4 @@
 # Bootstrap: one key has to be in place by hand before the first push can
 # happen. Add it in DSM (Control Panel ▸ Terminal & SNMP) or with ssh-copy-id.
 
-dwkns-smb-nas
+dwkns-nas

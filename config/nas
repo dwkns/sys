@@ -4,5 +4,5 @@
 #          `ssh` reaches it over the tailnet or the local network
 #   web    its admin web page, opened by `sys nas open`
 
-host dwkns-smb-nas
-web  http://dwkns-smb-nas.local:5000
+host dwkns-nas
+web  http://dwkns-nas.local:5000

@@ -7,7 +7,7 @@
 
 typeset -U path PATH
 
-# Homebrew on PATH. Without this, `ssh mini-m1 'op …'` (or git, gh, mise…)
+# Homebrew on PATH. Without this, `ssh mini 'op …'` (or git, gh, mise…)
 # fails with "command not found" while the same command works when you are
 # sitting at the machine.
 [[ -x /opt/homebrew/bin/brew ]] && path=(/opt/homebrew/bin /opt/homebrew/sbin $path)

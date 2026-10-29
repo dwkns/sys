@@ -3,13 +3,13 @@
 #   machine            account   may be logged into from
 #
 # Names are each machine's hostname. Aliases drop the shared "dwkns-" so
-# `ssh mini-m1` reaches dwkns-mini-m1. Public keys live in keys/NAME.pub and
+# `ssh mini` reaches dwkns-mini. Public keys live in keys/NAME.pub and
 # are shared automatically; private keys never leave their machine.
 #
 # dwkns-iphone is Termius on the phone. It only logs in, so it has no line of
 # its own: just its public key in keys/dwkns-iphone.pub, added by hand.
 
-dwkns-mbp-m5         dwkns     dwkns-mini-m1  dwkns-iphone
-dwkns-mini-m1        dwkns     dwkns-mbp-m5  dwkns-mbp-ubuntu  dwkns-iphone
-dwkns-mbp-ubuntu     admin     dwkns-mbp-m5  dwkns-mini-m1  dwkns-iphone
-dwkns-smb-nas        dwkns     dwkns-mbp-m5  dwkns-mini-m1  dwkns-mbp-ubuntu  dwkns-iphone
+dwkns-m5         dwkns     dwkns-mini  dwkns-iphone
+dwkns-mini       dwkns     dwkns-m5  dwkns-ubuntu  dwkns-iphone
+dwkns-ubuntu     admin     dwkns-m5  dwkns-mini  dwkns-iphone
+dwkns-nas        dwkns     dwkns-m5  dwkns-mini  dwkns-ubuntu  dwkns-iphone

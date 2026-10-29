@@ -1,7 +1,7 @@
-# The Ubuntu box — dwkns-mbp-ubuntu
+# The Ubuntu box — dwkns-ubuntu
 
 An old MacBook Pro running Ubuntu Server, on the tailnet at
-`dwkns-mbp-ubuntu`. Account `admin`, with passwordless sudo. `sys` runs here,
+`dwkns-ubuntu`. Account `admin`, with passwordless sudo. `sys` runs here,
 but only does a subset — see below.
 
 Written down because most of what is on it comes from vendor apt repositories
@@ -46,15 +46,33 @@ these change, and a stale keyring command is worse than none.
 ## Its two routes
 
 Like every other machine it should be reachable both over Tailscale
-(`dwkns-mbp-ubuntu`) and on the home network (`dwkns-mbp-ubuntu.local`, which
-is 192.168.4.200). The second one silently did not work for a long time:
+(`dwkns-ubuntu`) and on the home network (`dwkns-ubuntu.local`, which is
+192.168.4.200). The second one silently did not work for a long time:
 `/etc/avahi/avahi-daemon.conf` had `host-name=dwkns-mbp-unbutu` — a typo — so
 avahi advertised the box under a misspelled name and the correct one never
-resolved. Corrected to `dwkns-mbp-ubuntu`; the original file is kept beside it
-as `avahi-daemon.conf.before-sys`.
+resolved. The original file is kept beside it as
+`avahi-daemon.conf.before-sys`. That file names the host explicitly, so a new
+hostname needs a new `host-name=` line there too, then
+`sudo systemctl restart avahi-daemon` — `hostnamectl` alone does not change
+the `.local` name.
+
+The box was `dwkns-ubuntu` until October 2026; `config/ssh/old-names`
+keeps that name and `ubuntu` working as aliases for a while.
 
 If the `.local` name stops resolving again, that file is the first place to
 look, then `systemctl is-active avahi-daemon`.
+
+## Tailscale Serve and Funnel
+
+- `https://dwkns-ubuntu.tail75564c.ts.net` (443) → Lift on `127.0.0.1:8000`.
+- `https://dwkns-ubuntu.tail75564c.ts.net:8443` (Funnel, public) → youpod on
+  `100.91.126.118:8080`.
+
+Both are keyed by the tailnet name. After a rename, re-create them:
+
+```bash
+sudo tailscale serve reset && sudo tailscale serve --bg --https=443 http://127.0.0.1:8000 && sudo tailscale funnel --bg --https=8443 http://100.91.126.118:8080
+```
 
 ## Ordinary packages
 

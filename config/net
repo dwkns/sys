@@ -14,4 +14,4 @@
 # changes. dwkns-timemachine is deliberately absent: Time Machine mounts that
 # share itself, and a second mount of it would only get in the way.
 
-dwkns-nas    | smb://dwkns@dwkns-smb-nas.local/dwkns-nas
+dwkns-nas    | smb://dwkns@dwkns-nas.local/dwkns-nas

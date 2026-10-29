@@ -56,9 +56,9 @@ One file in the repo says who may log in where:
 ```
 # config/ssh/access
 # machine            account   may be logged into from
-dwkns-mbp-m5         dwkns     dwkns-mini-m1
-dwkns-mini-m1        dwkns     dwkns-mbp-m5  dwkns-mbp-ubuntu
-dwkns-mbp-ubuntu     admin     dwkns-mbp-m5  dwkns-mini-m1
+dwkns-m5         dwkns     dwkns-mini
+dwkns-mini        dwkns     dwkns-m5  dwkns-ubuntu
+dwkns-ubuntu     admin     dwkns-m5  dwkns-mini
 ```
 
 Every `sys sync` applies it. On each machine that means: make its own key if
@@ -66,7 +66,7 @@ it has none, share its public keys into the repo (the user key under
 `config/ssh/keys/`, the machine's own host key under `config/ssh/hostkeys/` —
 the one thing sync commits by itself; both are safe to publish and always the
 machine's own), install the keys of the machines let in here, pin every other
-machine's host key, and write an alias for each. So `ssh mini-m1` just works,
+machine's host key, and write an alias for each. So `ssh mini` just works,
 as the right account, with no password: over Tailscale from anywhere, or over
 the home network with Tailscale off. A machine that is not the one it claims
 to be is refused. The aliases never offer a password; plain `ssh user@host`
@@ -79,6 +79,10 @@ a password or copies a key by hand.
 sync; if the machine has no GitHub login yet, sync signs you in through `gh`
 once, in the browser, and carries on. Add the new machine to `config/ssh/access` on
 any machine and `sys push`; every other machine follows on its next sync.
+
+**A renamed machine** keeps answering to its old names for a while: list them
+against its new name in `config/ssh/old-names`, and sync writes them as extra
+aliases.
 
 **A device that only logs in** — Termius on the phone — needs no line of its
 own. Put its public key in `config/ssh/keys/NAME.pub`, add NAME to the "from"
@@ -112,8 +116,8 @@ there, so the run prints the command for you to type instead.
 
 ## Sessions that survive a dropped connection
 
-Every interactive ssh login lands in tmux: `sys ssh mini-m1`, plain
-`ssh mini-m1`, or a terminal app on your phone. Close the lid, lose signal, or
+Every interactive ssh login lands in tmux: `sys ssh mini`, plain
+`ssh mini`, or a terminal app on your phone. Close the lid, lose signal, or
 quit the app: the session keeps running on the machine, and the next login
 picks it up exactly where you left it. `Ctrl-b d` detaches on purpose and
 leaves you at a plain shell.

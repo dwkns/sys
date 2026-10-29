@@ -17,6 +17,7 @@ SSH_ACCESS="$ROOT_DIR/config/ssh/access"
 SSH_KEYS_DIR="$ROOT_DIR/config/ssh/keys"
 SSH_HOSTKEYS_DIR="$ROOT_DIR/config/ssh/hostkeys"     # each machine's sshd host key, also public
 SSH_NO_SYS="$ROOT_DIR/config/ssh/no-sys"      # machines that cannot run sys; their access is pushed to them
+SSH_OLD_NAMES="$ROOT_DIR/config/ssh/old-names" # names a machine had before, kept as extra aliases
 SSH_KNOWN="$HOME/.ssh/known_hosts_sys"        # generated from hostkeys/; NOT under config.d, which ssh reads as config
 SSH_HOST_PUB="/etc/ssh/ssh_host_ed25519_key.pub"
 SSH_ALIASES="$HOME/.ssh/config.d/sys"                 # generated, safe to delete
@@ -53,7 +54,7 @@ ssh_access_lines() {
   return 0
 }
 
-# dwkns-mbp-m5 -> mbp-m5: if every machine shares the same first segment it
+# dwkns-m5 -> m5: if every machine shares the same first segment it
 # is the owner's name, and the alias is what follows. Otherwise the full name.
 ssh_prefix() {
   local first p
@@ -67,9 +68,16 @@ ssh_prefix() {
 }
 ssh_alias() { local p; p="$(ssh_prefix)"; printf '%s' "${1#"$p"}"; }
 
+# The names a machine had before it was renamed, space-separated (old-names).
+ssh_old_names() {
+  [[ -f "$SSH_OLD_NAMES" ]] || return 0
+  sed 's/#.*//' "$SSH_OLD_NAMES" | awk -v m="$1" '$1 == m { for (i = 2; i <= NF; i++) printf "%s ", $i }'
+  return 0
+}
+
 # ed25519, made here, never copied anywhere. No passphrase, on purpose: the
 # disks are encrypted, a headless machine has nobody to type one, and the
-# point is that `ssh mini-m1` just works.
+# point is that `ssh mini` just works.
 ssh_make_key() {
   ssh_has_key && return 0
   doing "Making this machine's SSH key"
@@ -199,9 +207,14 @@ ssh_write_aliases() {
   # works on the home network with Tailscale off. HostKeyAlias makes both
   # routes share one pinned host key. A machine whose host key is not in the
   # repo yet is accepted on first contact, as before, until it is.
+  local old match o
   while read -r m account _; do
     [[ "$m" == "$me" ]] && continue
-    a="$(ssh_alias "$m")"; all="$all $a"
+    a="$(ssh_alias "$m")"
+    # A renamed machine answers to its old names too (config/ssh/old-names).
+    old="$(ssh_old_names "$m")"; old="${old% }"
+    match="$a"; for o in $old; do match="$match,$o"; done
+    all="$all $a${old:+ $old}"
     # Pinned: only the repo's copy of the host key counts, so a stale entry in
     # the ordinary known_hosts can never vouch for an impostor. Not pinned
     # yet: the ordinary file, accepted on first contact, as before.
@@ -210,8 +223,8 @@ ssh_write_aliases() {
     else
       strict="  StrictHostKeyChecking accept-new"$'\n'"  UserKnownHostsFile ~/.ssh/known_hosts"
     fi
-    out="$out"$'\n'"Match originalhost $a exec \"$ROOT_DIR/bin/ssh-reach $m\""$'\n'"  HostName $m"$'\n'
-    out="$out"$'\n'"Host $a"$'\n'"  HostName $m.local"$'\n'"  User $account"$'\n'"  HostKeyAlias $m"$'\n'"$strict"$'\n'
+    out="$out"$'\n'"Match originalhost $match exec \"$ROOT_DIR/bin/ssh-reach $m\""$'\n'"  HostName $m"$'\n'
+    out="$out"$'\n'"Host $a${old:+ $old}"$'\n'"  HostName $m.local"$'\n'"  User $account"$'\n'"  HostKeyAlias $m"$'\n'"$strict"$'\n'
   done < <(ssh_access_lines)
   [[ -n "$all" ]] || { [[ -z "$quiet" ]] && note "No other machines in config/ssh/access"; return 0; }
   out="$out"$'\n'"Host$all"$'\n'
@@ -226,7 +239,7 @@ ssh_write_aliases() {
   # ~/.ssh/config, and ssh takes the first value it finds, so this wins over a
   # `Host *` agent line there without stopping it for other hosts.
   out="$out  IdentityAgent none"$'\n'
-  # Bound the connect for a hand-typed `ssh mini-m1` too, not just sys's own.
+  # Bound the connect for a hand-typed `ssh mini` too, not just sys's own.
   out="$out  ConnectTimeout 5"$'\n'
   out="$out  PasswordAuthentication no"$'\n'"  KbdInteractiveAuthentication no"$'\n'
 

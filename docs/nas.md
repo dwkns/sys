@@ -1,7 +1,7 @@
-# The NAS — dwkns-smb-nas
+# The NAS — dwkns-nas
 
-A Synology DS220j running DSM 7.1, on the tailnet as `dwkns-smb-nas` and on the
-home network as `dwkns-smb-nas.local` (192.168.5.45). One 3.6 TB volume.
+A Synology DS220j running DSM 7.1, on the tailnet as `dwkns-nas` and on the
+home network as `dwkns-nas.local` (192.168.5.45). One 3.6 TB volume.
 
 `sys nas` shows its state at a glance; `sys nas open` opens its web page.
 
@@ -22,7 +22,7 @@ without knowing the password and then have `sudo` refuse you. To check a
 password without changing anything:
 
 ```bash
-ssh -t smb-nas 'sudo -v && echo CORRECT'
+ssh -t nas 'sudo -v && echo CORRECT'
 ```
 
 Reset it in Control Panel ▸ User & Group ▸ dwkns ▸ Edit.
@@ -38,7 +38,7 @@ Reset it in Control Panel ▸ User & Group ▸ dwkns ▸ Edit.
 
 ## Time Machine
 
-Destination: `smb://dwkns@dwkns-smb-nas.local/dwkns-timemachine` — the **local
+Destination: `smb://dwkns@dwkns-nas.local/dwkns-timemachine` — the **local
 network** name, deliberately, not the Tailscale one. Backing up over the
 tailnet worked until Tailscale stopped on the NAS, at which point backups
 failed silently for a day. Backups only happen at home anyway.
@@ -47,7 +47,7 @@ Set it with `-p` so the password is prompted for rather than passed as an
 argument, and so `backupd` (which runs as root) gets a credential it can use:
 
 ```bash
-sudo tmutil setdestination -p smb://dwkns@dwkns-smb-nas.local/dwkns-timemachine
+sudo tmutil setdestination -p smb://dwkns@dwkns-nas.local/dwkns-timemachine
 ```
 
 Without `-a` this **replaces** the whole destination list — including any local
@@ -62,7 +62,7 @@ Two causes seen so far, in order of likelihood:
    mounted:
 
    ```bash
-   ssh smb-nas 'rm -f /volume1/dwkns-timemachine/dwkns-mbp-m5.sparsebundle/lock'
+   ssh nas 'rm -f /volume1/dwkns-timemachine/dwkns-mbp-m5.sparsebundle/lock'   # the bundle keeps the Mac's old name
    ```
 
    **Leave `token` alone.** It carries material the encrypted bundle needs;
@@ -89,7 +89,7 @@ by `root` from an older version that ran as root. Fixing ownership keeps the
 machine's existing tailnet identity, so nothing has to be re-authorised:
 
 ```bash
-ssh -t smb-nas 'sudo chown -R tailscale:tailscale /volume1/@appdata/Tailscale && sudo synopkg restart Tailscale'
+ssh -t nas 'sudo chown -R tailscale:tailscale /volume1/@appdata/Tailscale && sudo synopkg restart Tailscale'
 ```
 
 `synopkg start` also sets the package to start at boot; `synopkg resume` does
@@ -114,8 +114,8 @@ not.
 ## Keychain on the Macs
 
 SMB passwords live in the login Keychain, one item per account **and per name
-used to reach the NAS** — `dwkns-smb-nas._smb._tcp.local` and
-`dwkns-smb-nas.tail75564c.ts.net` are separate items. Reaching the same NAS by
+used to reach the NAS** — `dwkns-nas._smb._tcp.local` and
+`dwkns-nas.tail75564c.ts.net` are separate items. Reaching the same NAS by
 a new name means one more prompt, once. Time Machine's own credential lives in
 the System keychain, and the backup's encryption key in the iCloud keychain:
 **never delete that one**, or existing backups become unreadable.

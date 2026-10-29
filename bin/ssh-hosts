@@ -120,7 +120,7 @@ def ssh_config_hosts(path=SSH_DIR / "config", seen=None, by_alias=None):
 
 
 def alias_of(machine, machines):
-    """dwkns-mini-m1 -> mini-m1, when every machine shares the first segment."""
+    """dwkns-mini -> mini, when every machine shares the first segment."""
     if not all("-" in m for m in machines):
         return machine
     prefix = machines[0].split("-")[0] + "-"

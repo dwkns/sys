@@ -190,7 +190,7 @@ print("""
 Each machine makes its own SSH key, shares the public half into
 config/ssh/keys/, and pins every other machine's host key from
 config/ssh/hostkeys/. Private keys never leave the machine that made them.
-Aliases drop the shared prefix, so `ssh mini-m1` reaches dwkns-mini-m1 over
+Aliases drop the shared prefix, so `ssh mini` reaches dwkns-mini over
 Tailscale, or NAME.local when Tailscale is off.""")
 
 # ── State ────────────────────────────────────────────────────────────────────

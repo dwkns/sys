@@ -190,8 +190,8 @@ One file drives it: **`config/ssh/access`**.
 
 ```
 # machine            account   may be logged into from
-dwkns-mbp-m5         dwkns     dwkns-mini-m1
-dwkns-mini-m1        dwkns     dwkns-mbp-m5  dwkns-mbp-ubuntu
+dwkns-m5         dwkns     dwkns-mini
+dwkns-mini        dwkns     dwkns-m5  dwkns-ubuntu
 ```
 
 Column 1 is the machine's hostname, column 2 the account to log in as, the rest
@@ -219,7 +219,7 @@ on the local machine:
    covers both. The aliases use keys only and never offer a password.
 
 Aliases drop the shared `dwkns-` prefix when every machine has it, so `ssh
-mini-m1` works.
+mini` works.
 
 **Machines that cannot run sys** are listed in `config/ssh/no-sys` (the
 Synology: no git, so no repo). `ssh_push_access` writes their
@@ -268,6 +268,24 @@ pasted in on a Mac instead of leaving untracked files behind.
 public key goes in `config/ssh/keys/NAME.pub` by hand, and NAME in the "from"
 column. No line of its own — column 1 is only for machines that are logged
 into, and `ssh_prefix`, the aliases and `sys ssh` read column 1 only.
+
+**Renaming a machine.** The name is the hostname, so the order matters, and
+the machine must stay reachable throughout (by LAN IP if nothing else — a
+rename never touches sshd or the keys):
+1. Rename it (`sys hostname NEW` on a Mac; `hostnamectl` plus the avahi
+   `host-name=` line on Linux; DSM's server name on the NAS) and in the
+   Tailscale admin console.
+2. In the repo, change the name everywhere in `config/ssh/access` (and
+   `no-sys`, `config/nas`, `config/net`), and rename its files under
+   `config/ssh/keys/` and `config/ssh/hostkeys/` — contents untouched, so
+   `ssh_share_key` sees nothing new.
+3. Add a line to `config/ssh/old-names` so the old aliases keep working.
+   On a machine running Tailscale Serve or Funnel, re-create them: their
+   config is keyed by the old tailnet name (`dwkns-mbp-ubuntu…:443`) and
+   stops answering — TLS "internal error" — the moment the name changes.
+4. Commit, push, `sys sync all`. A machine whose hostname is not in the
+   access file only gets a warning: `ssh_install_access` returns before
+   touching `authorized_keys`, so a half-done rename locks nobody out.
 
 **Removing a machine:** delete its line in `config/ssh/access`, remove its name
 from every "from" column, delete `config/ssh/keys/NAME.pub` and
@@ -457,7 +475,7 @@ whenever behaviour changes.
   verifies its own write, `bin/set-desktop-colour --check`).
 - `sys doctor` after anything structural.
 - To re-test a once-only step: `rm .state/<name>` or `sys sync --force`.
-- Testing on another machine happens over ssh (`ssh mbp-m5 'sys sync'`). Note
+- Testing on another machine happens over ssh (`ssh m5 'sys sync'`). Note
   that a sandboxed tool without macOS "Local Network" permission cannot reach
   `*.local` at all — the symptom is "No route to host" from a command that works
   in the user's own terminal.

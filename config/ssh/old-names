@@ -1,0 +1,14 @@
+# Old names that still reach a machine, for a while after it was renamed.
+#
+#   machine (its name now)   old names, as aliases
+#
+# sys sync writes each old name into ~/.ssh/config.d/sys as an extra alias for
+# the machine, so scripts and habits that still say `ssh mbp-ubuntu` keep
+# working. Delete a line once nothing uses the old names any more.
+#
+# Renamed in October 2026.
+
+dwkns-m5         mbp-m5      dwkns-mbp-m5
+dwkns-mini       mini-m1     dwkns-mini-m1
+dwkns-ubuntu     mbp-ubuntu  dwkns-mbp-ubuntu
+dwkns-nas        smb-nas     dwkns-smb-nas
