@@ -30,7 +30,7 @@ sys ai|Everything an AI needs to know about this repo, generated
 |
 sys ssh|The machines sys manages, and whether each is reachable
 sys ssh all|The same, plus anything hand-written in ~/.ssh/config
-sys ssh NAME|Log in and attach the session waiting there
+sys ssh NAME|Log in and attach a tmux session no other connection is using
 sys ssh harden|Keys only on this machine — optional, passwords stay on otherwise
 sys ssh man|The manual
 |
@@ -184,6 +184,7 @@ case "$cmd" in
     if ! is_macos; then
       install_apt_packages || true
       install_shared_dotfiles
+      install_bashrc_hook
       ssh_apply quiet
       ok "Done"
       [[ "$ARG" == "all" ]] && ssh_sync_others

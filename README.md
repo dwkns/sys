@@ -33,7 +33,7 @@ it finishes it opens a fresh shell with the new config loaded.
 | `sys ssh` | The machines sys manages, and whether each is reachable right now |
 | `sys ssh all` | The same, plus anything hand-written in `~/.ssh/config` |
 | `sys ssh man` | The manual |
-| `sys ssh NAME` | Log in and attach the tmux session waiting there |
+| `sys ssh NAME` | Log in and attach a tmux session no other connection is using |
 | `sys ssh harden` | Keys only on this machine — optional; passwords stay on otherwise |
 | `sys nas` | The NAS: how to reach it, its disk, shares and Tailscale |
 | `sys nas open` | Open the NAS's web page |
@@ -79,6 +79,10 @@ sync; if the machine has no GitHub login yet, sync signs you in through `gh`
 once, in the browser, and carries on. Add the new machine to `config/ssh/access` on
 any machine and `sys push`; every other machine follows on its next sync.
 
+**A device that only logs in** — Termius on the phone — needs no line of its
+own. Put its public key in `config/ssh/keys/NAME.pub`, add NAME to the "from"
+column of each machine it may reach, and `sys push`.
+
 **A machine that cannot run sys** — the Synology NAS has no git — is listed in
 `config/ssh/no-sys`. It only ever receives logins, so every machine that syncs
 and is allowed in there writes its `authorized_keys` over SSH instead, and
@@ -96,13 +100,22 @@ After that it is `sys sync` there too, whenever a machine is added.
 
 ## Sessions that survive a dropped connection
 
-`sys ssh mini-m1` logs in and attaches a tmux session called `main`, making one
-if there isn't one. Close the lid, lose signal, or quit the terminal on your
-phone: the session keeps running on the machine, and the next `sys ssh` picks
-it up exactly where you left it. `Ctrl-b d` detaches on purpose.
+Every interactive ssh login lands in tmux: `sys ssh mini-m1`, plain
+`ssh mini-m1`, or a terminal app on your phone. Close the lid, lose signal, or
+quit the app: the session keeps running on the machine, and the next login
+picks it up exactly where you left it. `Ctrl-b d` detaches on purpose and
+leaves you at a plain shell.
 
-The config is `dotfiles/.config/tmux/tmux.conf`, which the Macs get with the
-rest of the dotfiles and the Ubuntu box gets as a shared dotfile.
+A login takes a session that no other connection is using, or starts a new
+one. So each terminal tab has a session of its own, and a tab whose connection
+dropped gets its own back — it is the one with nobody attached. Two tabs that
+drop together may swap. Scripted ssh (`sys sync all`, `scp`, editors) has no
+terminal and never lands in tmux.
+
+The rule is `dotfiles/.config/tmux/attach`, run from the end of
+`dotfiles/.zshrc` on the Macs and from a marked block sync keeps in
+`~/.bashrc` on the Ubuntu box. The config is `dotfiles/.config/tmux/tmux.conf`.
+Both reach the Ubuntu box as shared dotfiles.
 
 ## Starting over
 

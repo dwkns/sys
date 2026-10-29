@@ -249,6 +249,11 @@ which on Linux does the repo update and SSH access only. If that machine cannot
 push (no `gh`), `ssh_share_key` prints its public keys and asks for them to be
 pasted in on a Mac instead of leaving untracked files behind.
 
+**A device that only logs in** (Termius on the phone, `dwkns-iphone`): its
+public key goes in `config/ssh/keys/NAME.pub` by hand, and NAME in the "from"
+column. No line of its own — column 1 is only for machines that are logged
+into, and `ssh_prefix`, the aliases and `sys ssh` read column 1 only.
+
 **Removing a machine:** delete its line in `config/ssh/access`, remove its name
 from every "from" column, delete `config/ssh/keys/NAME.pub` and
 `config/ssh/hostkeys/NAME.pub`, `sys push`, then sync everywhere. The managed
@@ -409,6 +414,15 @@ bare PATH, so Homebrew binaries look missing — `sys ssh NAME` wraps its remote
 command in `bash -lc` for exactly this reason, and it silently handed back a
 plain shell instead of tmux until it did. Test it in a pty and check what you
 actually landed in.
+
+**tmux on ssh login.** `dotfiles/.config/tmux/attach` picks the session: the
+first one with no client attached, else a new one. Three callers: the hook at
+the end of `dotfiles/.zshrc` (Macs), the marked block `install_bashrc_hook`
+keeps in `~/.bashrc` (Linux), and `ssh_connect`. The hooks need an interactive
+shell, `$SSH_CONNECTION` set, `$TMUX` empty and a tty on stdin and stdout, so
+`sys sync all`, `scp` and editors probing the shell never land in tmux. Keep
+those guards if you touch it: a login that hangs in tmux breaks every scripted
+ssh call.
 
 **A new command or setup step.** Add the `case` branch in `bin/sys`, bump
 `TOTAL` if it is a numbered setup step, and update **both** `README.md` and

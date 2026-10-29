@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Attach this login to a tmux session that no other connection is using, or
+# start a new one. Every way in uses it: an interactive ssh login (the hook at
+# the end of ~/.zshrc on the Macs, and in ~/.bashrc on the Ubuntu box) and
+# `sys ssh NAME`.
+#
+# Why "no other connection": each terminal tab gets a session of its own, and a
+# tab whose connection dropped gets its session back, because that is the one
+# left with nobody attached. Two tabs that drop together may swap sessions;
+# nothing is lost either way.
+#
+# Installed by sys from ~/.system-config/dotfiles/.config/tmux/attach.
+
+# A non-interactive ssh command has a bare PATH, so look where Homebrew puts it.
+command -v tmux >/dev/null 2>&1 || PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+command -v tmux >/dev/null 2>&1 || { echo "attach: tmux is not installed" >&2; exit 1; }
+
+# tmux does not allow ':' in a session name, so it splits the two fields safely.
+free="$(tmux list-sessions -F '#{session_attached}:#{session_name}' 2>/dev/null |
+  awk -F: '$1 == 0 { print $2; exit }')"
+
+if [ -n "$free" ]; then
+  exec tmux attach-session -t "=$free"
+else
+  exec tmux new-session
+fi

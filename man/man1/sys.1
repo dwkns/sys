@@ -170,6 +170,21 @@ private key never leaves the machine that made it. Nothing here ever types a
 password. Sharing the keys needs a GitHub login on this machine; a machine
 without one is signed in on the spot, once, with a code and a browser page.
 .TP
+.B ssh NAME
+Log in to NAME (the alias or the full machine name from
+.IR config/ssh/access )
+and attach a tmux session that no other connection is using, or start one.
+A plain interactive
+.B ssh
+login does the same, through a hook at the end of
+.I ~/.zshrc
+on a Mac and a marked block sync keeps in
+.I ~/.bashrc
+on Linux. The rule is
+.IR ~/.config/tmux/attach .
+.B Ctrl\-b d
+detaches and leaves the session running.
+.TP
 .B ssh harden
 Optional. Turn off password logins on this machine by writing
 .I /etc/ssh/sshd_config.d/00\-sys\-keys\-only.conf
@@ -329,6 +344,10 @@ Optional App Store apps, installed only by
 .TP
 .I ~/.system-config/dotfiles/
 Copied into the home directory.
+.TP
+.I ~/.config/tmux/attach
+Picks the tmux session an ssh login attaches to: one nobody else is using, or
+a new one. Also copied to Linux machines.
 .TP
 .I ~/.system-config/.drift/
 System files replaced by the last sync. Not tracked by git.

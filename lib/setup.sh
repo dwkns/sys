@@ -180,7 +180,7 @@ install_apt_packages() {
 # The few dotfiles that make sense on any machine. A full sync_install would
 # drop .zshrc and friends on the Ubuntu box, and those are all Homebrew, macOS
 # paths and duti.
-SHARED_DOTFILES=".config/tmux/tmux.conf"
+SHARED_DOTFILES=".config/tmux/tmux.conf .config/tmux/attach"
 install_shared_dotfiles() {
   local rel src dst n=0
   for rel in $SHARED_DOTFILES; do
@@ -192,6 +192,32 @@ install_shared_dotfiles() {
     n=$((n + 1))
   done
   (( n > 0 )) && doing "Installed $n shared dotfile(s)"
+  return 0
+}
+
+# Linux only: the Macs get the same hook at the end of dotfiles/.zshrc, but
+# ~/.bashrc here is Ubuntu's own file, so sys keeps just a marked block in it.
+# The block is rewritten when it differs; everything outside it is left alone.
+BASHRC_MARK_START="# >>> sys: tmux on ssh login >>>"
+BASHRC_MARK_END="# <<< sys: tmux on ssh login <<<"
+install_bashrc_hook() {
+  local rc="$HOME/.bashrc" block outside new
+  block="$BASHRC_MARK_START
+# Added by sys sync (~/.system-config). An interactive ssh login lands in a
+# tmux session no other connection is using. Rule: ~/.config/tmux/attach
+if [[ \$- == *i* && -n \"\$SSH_CONNECTION\" && -z \"\$TMUX\" && -t 0 && -t 1 && -r ~/.config/tmux/attach ]]; then
+  bash ~/.config/tmux/attach
+fi
+$BASHRC_MARK_END"
+  outside=""
+  [[ -f "$rc" ]] && outside="$(awk -v s="$BASHRC_MARK_START" -v e="$BASHRC_MARK_END" \
+      '$0==s{in_=1;next} $0==e{in_=0;next} !in_' "$rc")"
+  outside="$(printf '%s\n' "$outside" | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}')"   # trim trailing blanks
+  new="$(printf '%s\n\n%s\n' "$outside" "$block" | sed '/./,$!d')"
+  [[ -f "$rc" && "$(cat "$rc")" == "$new" ]] && return 0
+  doing "Adding the tmux login hook to ~/.bashrc"
+  [[ "${DRY_RUN:-0}" == "1" ]] && { note "dry run: write the marked block in ~/.bashrc"; return 0; }
+  printf '%s\n' "$new" > "$rc.tmp" && mv "$rc.tmp" "$rc"
   return 0
 }
 

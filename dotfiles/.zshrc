@@ -65,3 +65,12 @@ done
 if [[ -z "$SSH_CONNECTION" && "$PWD" == "$HOME" && "${TERM_PROGRAM:-}" != (vscode|Cursor) ]]; then
   cd ~/Desktop
 fi
+
+# ── tmux over SSH ────────────────────────────────────────────────────────────
+# An interactive ssh login lands in a tmux session no other connection is
+# using, so a dropped connection loses nothing. The rule is in
+# ~/.config/tmux/attach. Needs a terminal on both ends, so tools that run the
+# shell without one are left alone. Ctrl-b d leaves you at a plain shell.
+if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -t 0 && -t 1 && -r ~/.config/tmux/attach ]]; then
+  bash ~/.config/tmux/attach
+fi
