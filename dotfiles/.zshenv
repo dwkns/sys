@@ -1,4 +1,4 @@
-# ~/.zshenv — managed by ~/.system-config
+# ~/.zshenv — managed by ~/.sys
 #
 # Read by EVERY zsh, including the non-interactive ones that `ssh host 'cmd'`
 # starts. .zshrc is not: it returns at the top unless the shell is

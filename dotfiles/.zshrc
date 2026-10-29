@@ -1,4 +1,4 @@
-# ~/.zshrc — managed by ~/.system-config
+# ~/.zshrc — managed by ~/.sys
 [[ -o interactive ]] || return
 
 # ── PATH ─────────────────────────────────────────────────────────────────────
@@ -6,7 +6,7 @@
 typeset -U path PATH
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 path=(
-  "$HOME/.system-config/bin"
+  "$HOME/.sys/bin"
   "$HOME/.local/bin"
   "$HOME/.grok/bin"
   "/Applications/Sublime Text.app/Contents/SharedSupport/bin"
@@ -46,7 +46,7 @@ if [[ ~/.config/zsh/completions/_sys -nt ~/.zcompdump ]]; then compinit -i; else
 # ── Environment ──────────────────────────────────────────────────────────────
 export EDITOR='code -w'
 # Trailing colon makes man append the system manpath, so `man sys` works.
-export MANPATH="$HOME/.system-config/man:"
+export MANPATH="$HOME/.sys/man:"
 export HOMEBREW_CASK_OPTS="--appdir=/Applications"
 # Homebrew otherwise checks for updates before almost every command, which
 # turns a 2-second install into a 30-second one. Once a month is plenty.
@@ -57,7 +57,7 @@ export CLAUDE_CODE_OAUTH_TOKEN="$(security find-generic-password -a "$USER" -s c
 
 # ── Config ───────────────────────────────────────────────────────────────────
 # Guarded so a missing repo degrades quietly instead of erroring every shell.
-for f in "$HOME/.system-config/lib/common.sh" "$HOME/.aliases" "$HOME/.projects"; do
+for f in "$HOME/.sys/lib/common.sh" "$HOME/.aliases" "$HOME/.projects"; do
   [[ -r "$f" ]] && source "$f"
 done
 

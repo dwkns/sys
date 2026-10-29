@@ -10,7 +10,7 @@ Plain text, no colour: the reader is a program.
 """
 import os, pathlib, re, subprocess, sys
 
-ROOT = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".system-config"))
+ROOT = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".sys"))
 
 
 def sh(*args, cwd=ROOT):

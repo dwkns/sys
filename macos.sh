@@ -3,7 +3,7 @@
 #
 # Only settings that differ from macOS's own defaults are here — writing a
 # value the system already uses is noise. See `man sys`.
-source "$HOME/.system-config/lib/common.sh"
+source "$HOME/.sys/lib/common.sh"
 
 # Stop System Settings overwriting what we're about to change. killall rather
 # than osascript: telling an app to quit needs Automation permission, which

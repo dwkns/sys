@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Everything that turns a bare Mac into a working one.
 
-source "${ROOT_DIR:-$HOME/.system-config}/lib/common.sh"
-source "${ROOT_DIR:-$HOME/.system-config}/lib/sync.sh"
+source "${ROOT_DIR:-$HOME/.sys}/lib/common.sh"
+source "${ROOT_DIR:-$HOME/.sys}/lib/sync.sh"
 
 install_homebrew() {
   has_cmd brew && return 0
@@ -203,7 +203,7 @@ BASHRC_MARK_END="# <<< sys: tmux on ssh login <<<"
 install_bashrc_hook() {
   local rc="$HOME/.bashrc" block outside new
   block="$BASHRC_MARK_START
-# Added by sys sync (~/.system-config). An interactive ssh login lands in a
+# Added by sys sync (~/.sys). An interactive ssh login lands in a
 # tmux session no other connection is using. Rule: ~/.config/tmux/attach
 if [[ \$- == *i* && -n \"\$SSH_CONNECTION\" && -z \"\$TMUX\" && -t 0 && -t 1 && -r ~/.config/tmux/attach ]]; then
   bash ~/.config/tmux/attach
@@ -358,7 +358,7 @@ remove_everything() {
   plan+=("~/.cursor ($(ls -1 "$HOME/.cursor/extensions" 2>/dev/null | wc -l | tr -d ' ') Cursor extensions)")
   plan+=("~/Library/Application Support/Cursor and Sublime Text")
   plan+=("~/Library/Colors")
-  plan+=("~/Library/Application Support/system-config (the desktop colour image)")
+  plan+=("~/Library/Application Support/sys (the desktop colour image)")
   plan+=("preferences for Cursor, Sublime Text and Ghostty")
   plan+=("the Dock and Finder settings, back to macOS defaults")
   plan+=("$ROOT_DIR/.state and $ROOT_DIR/.drift")
@@ -399,6 +399,7 @@ remove_everything() {
   wipe "$HOME/Library/Application Support/Cursor"
   wipe "$HOME/Library/Application Support/Sublime Text"
   wipe "$HOME/Library/Colors"
+  wipe "$HOME/Library/Application Support/sys"
   wipe "$HOME/Library/Application Support/system-config"
   wipe "$HOME/Library/Caches/Cursor"
   rm -f "$HOME/Library/Preferences/com.todesktop.230313mzl4w4u92.plist" \
@@ -427,7 +428,7 @@ remove_everything() {
 
 print_fresh_user_steps() {
   printf '\n%sTo install again from scratch:%s\n\n' "$GREY" "$RESET"
-  printf '  %scurl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/install.sh | bash%s\n\n' \
+  printf '  %scurl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/install.sh | bash%s\n\n' \
     "$WHITE" "$RESET"
 }
 

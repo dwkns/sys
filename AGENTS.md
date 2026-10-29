@@ -4,8 +4,10 @@ Notes for an AI assistant (or a human) picking this up cold. `README.md` says wh
 the system does for its user; this file says how it works inside, and how to
 change it without breaking a machine.
 
-Repo: `~/.system-config` on every machine. Remote:
-`https://github.com/dwkns/system-install.git`, branch `master`.
+Repo: `~/.sys` on every machine. Remote:
+`https://github.com/dwkns/sys.git`, branch `master`. Until October 2026 it
+was `~/.system-config`, cloned from `dwkns/system-install` (section 5, "Where
+the repo lives").
 
 ---
 
@@ -238,7 +240,7 @@ still needs one key put there by hand.
 **A new Mac.**
 
 1. On the new Mac, run the installer:
-   `curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/install.sh | bash`
+   `curl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/install.sh | bash`
    Setup names it `dwkns-<type>-<chip>` (15-second prompt to override), turns on
    Remote Login and Screen Sharing, makes its SSH key and, on the first sync
    that can reach GitHub, commits `config/ssh/keys/NAME.pub` and
@@ -256,7 +258,7 @@ file, push, sync. Nothing is copied by hand.
 **A machine that does not run sys** (the Ubuntu box):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/bin/ssh-access | bash
+curl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/bin/ssh-access | bash
 ```
 
 It clones the repo, symlinks `sys` into `~/.local/bin`, and runs `sys sync`,
@@ -341,7 +343,19 @@ that file (`request_reload`) makes the wrapper `exec zsh` afterwards.
 missing login it runs a GitHub device-code sign-in (`github_device_login` in
 `lib/sync.sh`) rather than stalling at a `Username:` prompt.
 
-**Environment:** `ROOT_DIR`, `DRY_RUN`, `ASSUME_YES`, `FORCE`, `SYS_RESTARTED`,
+**Where the repo lives.** `bin/sys` works out `ROOT_DIR` from its own
+location, following symlinks, and ignores any `ROOT_DIR` it is handed; the
+libraries and Python helpers fall back to `~/.sys` only when run on their own.
+So a machine that pulls a change of path still finds itself. `migrate_root`
+(`lib/sync.sh`, run by sync and setup after the pull) did the move from
+`~/.system-config`: it moves the folder, leaves `~/.system-config` as a link to
+it, repoints `origin` and the Linux `~/.local/bin/sys` link, and restarts from
+the new place. It does nothing once done. The link and the old-path branch in
+`ssh_sync_others` can go once every machine has synced and nothing uses the
+old path; GitHub redirects the old repo URL as long as nobody creates a new
+`system-install`.
+
+**Environment:** `ROOT_DIR` (helpers only), `DRY_RUN`, `ASSUME_YES`, `FORCE`, `SYS_RESTARTED`,
 `SYS_FROM_INSTALLER`, `SYS_RELOAD_FILE`, `MACHINE_NAME_PREFIX`,
 `MAIL_EXPORTER_REPO`.
 

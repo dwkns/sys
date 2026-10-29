@@ -5,7 +5,7 @@
 [[ -n "${_SYSCFG_COMMON:-}" ]] && return 0
 _SYSCFG_COMMON=1
 
-ROOT_DIR="${ROOT_DIR:-$HOME/.system-config}"
+ROOT_DIR="${ROOT_DIR:-$HOME/.sys}"
 
 # Four colours, one meaning each. Everything sys prints uses only these, so
 # the colour tells you what kind of thing you are reading without reading it.

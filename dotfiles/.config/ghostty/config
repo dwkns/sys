@@ -1,4 +1,4 @@
-# Ghostty configuration — managed by ~/.system-config (see config/.dotfiles)
+# Ghostty configuration — managed by ~/.sys (see config/.dotfiles)
 #
 # Initial window size, in terminal grid cells: 100 columns x 25 rows.
 window-width = 100

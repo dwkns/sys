@@ -11,7 +11,7 @@ reliable, and needs no external tool.
 import os, plistlib, subprocess, sys, urllib.parse, pathlib
 
 DRY = "--dry-run" in sys.argv
-root = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".system-config"))
+root = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".sys"))
 cfg = root / "config" / "dock"
 if not cfg.is_file():
     sys.exit(0)

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # For a machine that does not run sys (the Ubuntu box). One command:
 #
-#   curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/bin/ssh-access | bash
+#   curl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/bin/ssh-access | bash
 #
-# Gets or updates the repo in ~/.system-config, then runs `sys sync`, which on
+# Gets or updates the repo in ~/.sys, then runs `sys sync`, which on
 # a machine that is not a Mac does just the repo update and SSH access: makes
 # this machine's key if it has none, installs the keys of the machines let in,
 # writes the aliases. Run it again whenever a machine is added.
 set -euo pipefail
 
-REPO="https://github.com/dwkns/system-install.git"
-DIR="${ROOT_DIR:-$HOME/.system-config}"
+REPO="https://github.com/dwkns/sys.git"
+DIR="${ROOT_DIR:-$HOME/.sys}"
 
 command -v git >/dev/null 2>&1 || { echo "Installing git"; sudo apt-get install -y git; }
 

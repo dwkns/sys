@@ -9,7 +9,7 @@
 # left with nobody attached. Two tabs that drop together may swap sessions;
 # nothing is lost either way.
 #
-# Installed by sys from ~/.system-config/dotfiles/.config/tmux/attach.
+# Installed by sys from ~/.sys/dotfiles/.config/tmux/attach.
 
 # A non-interactive ssh command has a bare PATH, so look where Homebrew puts it.
 command -v tmux >/dev/null 2>&1 || PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"

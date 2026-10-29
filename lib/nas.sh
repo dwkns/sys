@@ -7,7 +7,7 @@
 # Everything is read live over one SSH call, as dwkns, without root — so it
 # shows what is true now, and it can never type a password.
 
-source "${ROOT_DIR:-$HOME/.system-config}/lib/common.sh"
+source "${ROOT_DIR:-$HOME/.sys}/lib/common.sh"
 
 NAS_FILE="$ROOT_DIR/config/nas"
 

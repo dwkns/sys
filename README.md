@@ -1,11 +1,11 @@
-# system-config
+# sys
 
 macOS setup: one command on a new machine, one command to keep it in sync.
 
 ## New machine
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/install.sh | bash
 ```
 
 Installs Homebrew and everything in the `Brewfile`, copies dotfiles into place,
@@ -98,7 +98,7 @@ hand first, or there would be no way in to write the file with.
 repo update and SSH access. Once, to set up:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/bin/ssh-access | bash
+curl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/bin/ssh-access | bash
 ```
 
 After that it is `sys sync` there too, whenever a machine is added.

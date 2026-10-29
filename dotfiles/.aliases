@@ -7,8 +7,8 @@ alias dev='cd ~/Developer && ls -lha'
 
 # ── Editors ──────────────────────────────────────────────────────────────────
 alias c.='code .'
-alias ep='code ~/.system-config/dotfiles/.zshrc'   # edit shell config
-alias ea='code ~/.system-config/dotfiles/.aliases'
+alias ep='code ~/.sys/dotfiles/.zshrc'   # edit shell config
+alias ea='code ~/.sys/dotfiles/.aliases'
 alias rp='exec zsh'                                # reload the shell
 
 # ── Git ──────────────────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ alias ghv='gh repo view --web'
 sys() {
   local flag="${TMPDIR:-/tmp}/sys-reload-$$"
   rm -f "$flag"
-  SYS_RELOAD_FILE="$flag" command "$HOME/.system-config/bin/sys" "$@"
+  SYS_RELOAD_FILE="$flag" command "$HOME/.sys/bin/sys" "$@"
   local rc=$?
   if [[ -e "$flag" ]]; then
     rm -f "$flag"

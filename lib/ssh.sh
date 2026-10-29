@@ -9,8 +9,8 @@
 # every other machine. Private keys never leave the machine that made them.
 # Nothing here ever types a password.
 
-source "${ROOT_DIR:-$HOME/.system-config}/lib/common.sh"
-source "${ROOT_DIR:-$HOME/.system-config}/lib/sync.sh"
+source "${ROOT_DIR:-$HOME/.sys}/lib/common.sh"
+source "${ROOT_DIR:-$HOME/.sys}/lib/sync.sh"
 
 SSH_KEY="$HOME/.ssh/id_ed25519"
 SSH_ACCESS="$ROOT_DIR/config/ssh/access"
@@ -303,8 +303,9 @@ ssh_sync_others() {
       warn "$a: could not log in within 15s — skipped"; rc=1; continue
     fi
     # -t: a real terminal there, so a one-time GitHub sign-in can show its code.
+    # Both folders: a machine not yet moved to ~/.sys moves itself on this sync.
     if ssh -t -o BatchMode=yes -o ConnectTimeout=8 "$a" \
-         'test -x ~/.system-config/bin/sys && exec ~/.system-config/bin/sys sync; echo "sys is not installed here"; exit 99'; then
+         'for d in ~/.sys ~/.system-config; do test -x $d/bin/sys && exec $d/bin/sys sync; done; echo "sys is not installed here"; exit 99'; then
       :
     else
       case $? in

@@ -1,4 +1,4 @@
-.TH SYS 1 2026-09-15 "system-config" "User Commands"
+.TH SYS 1 2026-09-15 "sys" "User Commands"
 .SH NAME
 sys \- set up, sync and check this Mac
 .SH SYNOPSIS
@@ -8,7 +8,7 @@ sys \- set up, sync and check this Mac
 .SH DESCRIPTION
 .B sys
 is the single entry point to the configuration repository in
-.IR ~/.system-config .
+.IR ~/.sys .
 It sets up a new machine, keeps an existing one in step with the repository,
 saves local changes back, and reports on what is installed.
 .PP
@@ -298,7 +298,7 @@ delete it.
 .PP
 The repository always wins. Before replacing a system file whose contents
 differ, the old version is copied to
-.I ~/.system-config/.drift
+.I ~/.sys/.drift
 and a note is printed, so a local edit you forgot to
 .B sys push
 is never lost.
@@ -334,49 +334,49 @@ Python packages and virtual environments go through
 .BR uv (1).
 .SH FILES
 .TP
-.I ~/.system-config/Brewfile
+.I ~/.sys/Brewfile
 Applications and command-line tools.
 .TP
-.I ~/.system-config/macos.sh
+.I ~/.sys/macos.sh
 macOS defaults.
 .TP
-.I ~/.system-config/config/mas\-apps.txt
+.I ~/.sys/config/mas\-apps.txt
 App Store application IDs.
 .TP
-.I ~/.system-config/config/input
+.I ~/.sys/config/input
 Keyboard repeat, trackpad speed, clicking and gestures, applied immediately
 rather than at next login. Applied by
 .B sys setup
 and on every
 .BR "sys sync" .
 .TP
-.I ~/.system-config/config/desktop-colour
+.I ~/.sys/config/desktop-colour
 Solid desktop colour as four numbers, set through macOS's wallpaper API and
 checked on screen afterwards. Applied once by
 .BR "sys setup" .
 .TP
-.I ~/.system-config/Brewfile.optional
+.I ~/.sys/Brewfile.optional
 Optional extras, installed only by
 .BR "sys extras" .
 .TP
-.I ~/.system-config/config/mas\-apps\-optional.txt
+.I ~/.sys/config/mas\-apps\-optional.txt
 Optional App Store apps, installed only by
 .BR "sys extras" .
 .TP
-.I ~/.system-config/dotfiles/
+.I ~/.sys/dotfiles/
 Copied into the home directory.
 .TP
 .I ~/.config/tmux/attach
 Picks the tmux session an ssh login attaches to: one nobody else is using, or
 a new one. Also copied to Linux machines.
 .TP
-.I ~/.system-config/.drift/
+.I ~/.sys/.drift/
 System files replaced by the last sync. Not tracked by git.
 .SH ENVIRONMENT
 .TP
 .B ROOT_DIR
 Location of the repository. Default
-.IR ~/.system-config .
+.IR ~/.sys .
 .TP
 .B DRY_RUN
 Set to 1 for the effect of
@@ -414,4 +414,4 @@ Save a change made directly to a system file:
 .BR defaults (1),
 .BR security (1)
 .PP
-.I ~/.system-config/README.md
+.I ~/.sys/README.md

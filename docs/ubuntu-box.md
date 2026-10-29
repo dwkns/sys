@@ -10,7 +10,7 @@ disk dies, this is the rebuild list.
 
 ## What `sys sync` does here
 
-1. Updates the repo in `~/.system-config`.
+1. Updates the repo in `~/.sys`.
 2. Installs anything missing from `config/apt-packages`.
 3. Copies the shared dotfiles (`.config/tmux/tmux.conf` and
    `.config/tmux/attach`) — not the Mac ones, which are all Homebrew, macOS
@@ -21,7 +21,7 @@ disk dies, this is the rebuild list.
 No Homebrew, no mise, no macOS defaults. Install it with:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/bin/ssh-access | bash
+curl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/bin/ssh-access | bash
 ```
 
 ## Installed by hand, from vendor repositories

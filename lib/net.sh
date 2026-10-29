@@ -9,7 +9,7 @@
 # locked to Finder and NetAuthAgent, so smbutil and mount_smbfs are refused and
 # would fall back to asking. Nothing here reads, stores or types a password.
 
-source "${ROOT_DIR:-$HOME/.system-config}/lib/common.sh"
+source "${ROOT_DIR:-$HOME/.sys}/lib/common.sh"
 
 NET_FILE="$ROOT_DIR/config/net"
 

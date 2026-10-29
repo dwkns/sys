@@ -2,7 +2,7 @@
 """Write the current Dock to config/dock, preserving order."""
 import os, plistlib, subprocess, urllib.parse, pathlib, sys
 
-root = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".system-config"))
+root = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".sys"))
 home = str(pathlib.Path.home())
 
 done = subprocess.run(["defaults", "export", "com.apple.dock", "-"], capture_output=True)

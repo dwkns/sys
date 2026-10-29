@@ -8,7 +8,7 @@
 #   sync_install   repo -> system
 #   sync_backup    system -> repo   (only files the repo already tracks)
 
-source "${ROOT_DIR:-$HOME/.system-config}/lib/common.sh"
+source "${ROOT_DIR:-$HOME/.sys}/lib/common.sh"
 
 SUBLIME_USER_DIR="$HOME/Library/Application Support/Sublime Text/User"
 
@@ -127,6 +127,44 @@ restart_if_updated() {
   doing "sys was updated — restarting with the new version"
   export SYS_RESTARTED=1
   exec "$ROOT_DIR/bin/sys" ${SYS_ARGV[@]+"${SYS_ARGV[@]}"}
+}
+
+# The repo was ~/.system-config, cloned from dwkns/system-install; both are now
+# "sys". Run by sync and setup straight after the pull, so one `sys sync all`
+# moves every machine. Moves the folder (.state and .drift go with it), leaves
+# ~/.system-config as a link so old shells, PATHs and remote callers still
+# work, then restarts from the new place. Delete the link by hand once nothing
+# uses it. Safe to run every time: it does nothing once done.
+SYS_HOME="$HOME/.sys"
+SYS_OLD_HOME="$HOME/.system-config"
+SYS_REPO_URL="https://github.com/dwkns/sys.git"
+migrate_root() {
+  local url
+  url="$(git -C "$ROOT_DIR" remote get-url origin 2>/dev/null || true)"
+  case "$url" in
+    *dwkns/system-install*) run git -C "$ROOT_DIR" remote set-url origin "$SYS_REPO_URL" ;;
+  esac
+
+  # Linux: `sys` on PATH is a link that ssh-access made into the old folder.
+  local bin="$HOME/.local/bin/sys"
+  if [[ -L "$bin" && "$(readlink "$bin")" == "$SYS_OLD_HOME/"* ]]; then
+    run ln -sfn "$SYS_HOME/bin/sys" "$bin"
+  fi
+
+  [[ "$ROOT_DIR" == "$SYS_OLD_HOME" && ! -L "$SYS_OLD_HOME" ]] || return 0
+  if [[ -e "$SYS_HOME" ]]; then
+    warn "Both {{$SYS_OLD_HOME}} and {{$SYS_HOME}} exist — not moving anything"
+    note "Keep one: the repo belongs in {{$SYS_HOME}}"
+    return 0
+  fi
+  doing "Moving the repo to $SYS_HOME"
+  [[ "${DRY_RUN:-0}" == "1" ]] && { note "dry run: {{mv $SYS_OLD_HOME $SYS_HOME}}, then link the old name to it"; return 0; }
+  mv "$SYS_OLD_HOME" "$SYS_HOME" || die "Could not move $SYS_OLD_HOME to $SYS_HOME"
+  ln -s .sys "$SYS_OLD_HOME" || warn "Moved, but could not leave a link at $SYS_OLD_HOME"
+  [[ -L "$bin" ]] && ln -sfn "$SYS_HOME/bin/sys" "$bin"
+  ok "The repo is now $SYS_HOME"
+  export SYS_RESTARTED=1
+  exec "$SYS_HOME/bin/sys" ${SYS_ARGV[@]+"${SYS_ARGV[@]}"}
 }
 
 # Fast-forward to the latest repo (local edits set aside and put back), then

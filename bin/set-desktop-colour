@@ -18,11 +18,11 @@ success when every screen is really showing the new colour.
   set-desktop-colour --check    is every screen showing it? exit 0 yes,
                                 1 no, 2 no screens to check (e.g. over SSH)
 """
-import json, os, pathlib, struct, subprocess, sys, time, zlib
+import json, os, pathlib, shutil, struct, subprocess, sys, time, zlib
 
 DRY = "--dry-run" in sys.argv
 CHECK = "--check" in sys.argv
-root = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".system-config"))
+root = pathlib.Path(os.environ.get("ROOT_DIR", pathlib.Path.home() / ".sys"))
 cfg = root / "config" / "desktop-colour"
 if not cfg.is_file():
     sys.exit(f"{cfg} is missing — nothing to apply")
@@ -50,7 +50,7 @@ def write_png(path, rgb, size=64):
 
 # One file per colour: macOS caches wallpaper by path, so reusing a single name
 # for a different colour can leave the old colour on screen.
-folder = pathlib.Path.home() / "Library/Application Support/system-config"
+folder = pathlib.Path.home() / "Library/Application Support/sys"
 image =folder / f"desktop-{hexcol[1:].lower()}.png"
 if not CHECK:
     folder.mkdir(parents=True, exist_ok=True)
@@ -120,3 +120,7 @@ for _ in range(20):
 if seen["shown"] != seen["screens"]:
     sys.exit(f"Desktop colour {hexcol} showing on {seen['shown']} of {seen['screens']} screen(s).")
 print(f"Desktop colour {hexcol} on {seen['screens']} screen(s)")
+
+# The folder's name before the repo became "sys". Only now that the new image
+# is on screen is the old one safe to delete.
+shutil.rmtree(pathlib.Path.home() / "Library/Application Support/system-config", ignore_errors=True)

@@ -4,7 +4,7 @@
 # line to config/net is all it takes for it to complete.
 
 _sys() {
-  local root="${ROOT_DIR:-$HOME/.system-config}"
+  local root="${ROOT_DIR:-$HOME/.sys}"
   local -a cmds opts items
 
   cmds=(

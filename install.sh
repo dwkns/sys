@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Set up a new Mac with one command:
 #
-#   curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/dwkns/sys/master/install.sh | bash
 #
 # Runs start to finish. You will be asked for your password once, and to
 # accept the Command Line Tools dialog if they are not installed yet.
 set -euo pipefail
 
-ROOT_DIR="${ROOT_DIR:-$HOME/.system-config}"
-REPO="https://github.com/dwkns/system-install.git"
+ROOT_DIR="${ROOT_DIR:-$HOME/.sys}"
+REPO="https://github.com/dwkns/sys.git"
 
 # The same colours as lib/common.sh, repeated because the repo is not cloned
 # yet when this runs: grey for copy, white for a command you would type.
