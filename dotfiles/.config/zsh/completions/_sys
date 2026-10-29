@@ -15,6 +15,7 @@ _sys() {
     'ai:A generated brief of this repo, for an AI'
     'ssh:List the machines you can reach over SSH'
     'nas:The NAS — reach, disk, shares, Tailscale'
+    'tailscale:Turn Tailscale on here and on every machine this one may log into'
     'net:List the network shares, or connect to one'
     'hostname:Set the computer name'
     'extras:Install the optional extras'
@@ -46,6 +47,10 @@ _sys() {
     nas)
       items=( 'open:the NAS'"'"'s web page, in the browser' )
       _describe -t subcommands 'sys nas' items
+      ;;
+    tailscale)
+      items=( 'up:here first, then every machine this one may log into' )
+      _describe -t subcommands 'sys tailscale' items
       ;;
     ssh)
       items=( 'harden:keys only on this machine — passwords off' )

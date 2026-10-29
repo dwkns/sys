@@ -192,6 +192,27 @@ and restarting sshd. Refuses to run until at least one machine is let in
 here, so a headless machine cannot lock itself out. Open sessions are not
 dropped. Passwords stay on unless you run this.
 .TP
+.B tailscale up
+Turn Tailscale on here, then on every machine this one may log into according
+to
+.IR config/ssh/access .
+This machine goes first, because away from home the tailnet is the only route
+to the others; at home the aliases fall back to
+.IR NAME.local ,
+so a machine with Tailscale off can still be reached. A Mac opens the
+Tailscale app and runs
+.BR "tailscale up" ;
+Linux starts
+.B tailscaled
+and runs
+.B tailscale up
+through passwordless sudo. With no flags,
+.B tailscale up
+keeps every setting and only reconnects. A machine listed in
+.I config/ssh/no\-sys
+(the NAS) is only checked: its Tailscale needs sudo with a password, so the
+command to type is printed instead.
+.TP
 .B doctor
 Check that the expected tools are installed, report language versions, whether
 the App Store is reachable, whether this machine's SSH keys are shared and

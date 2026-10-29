@@ -37,6 +37,7 @@ it finishes it opens a fresh shell with the new config loaded.
 | `sys ssh harden` | Keys only on this machine — optional; passwords stay on otherwise |
 | `sys nas` | The NAS: how to reach it, its disk, shares and Tailscale |
 | `sys nas open` | Open the NAS's web page |
+| `sys tailscale up` | Turn Tailscale on here, then on every machine this one may log into |
 | `sys net` | List the network shares; `sys net dwkns-nas` mounts one |
 | `sys hostname` | Set the computer name (asks, or `sys hostname my-mac`) |
 | `sys extras` | Install optional extras (Office, Xcode, duckdb) |
@@ -98,6 +99,17 @@ curl -fsSL https://raw.githubusercontent.com/dwkns/system-install/master/bin/ssh
 
 After that it is `sys sync` there too, whenever a machine is added.
 
+## Turning Tailscale back on
+
+`sys tailscale up` turns Tailscale on here, then on every machine this one may
+log into. Here first: away from home the tailnet is the only route to the rest.
+At home the aliases fall back to `NAME.local`, so a machine with Tailscale off
+is still reachable — get into any one machine and the others can follow. From
+the phone, the mini is the best way in: it may log into all the others.
+
+The NAS is only checked. Its Tailscale needs `sudo`, which asks for a password
+there, so the run prints the command for you to type instead.
+
 ## Sessions that survive a dropped connection
 
 Every interactive ssh login lands in tmux: `sys ssh mini-m1`, plain
@@ -151,6 +163,7 @@ lib/common.sh                colours, logging, helpers
 lib/sync.sh                  mirrors config between repo and system
 lib/setup.sh                 brew, mise, App Store, macOS, the Dock
 lib/ssh.sh                   SSH keys, access and aliases from config/ssh/access (run by sync)
+lib/tailscale.sh             `sys tailscale up` — Tailscale on here and on the machines this one can log into
 bin/ssh-access               the one command for a machine that does not run sys
 bin/ssh-reach                Tailscale name or NAME.local? the aliases ask this
 bin/ai-brief                 `sys ai` — the repo explained, generated from the repo

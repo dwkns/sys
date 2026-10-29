@@ -99,6 +99,7 @@ state is carried by the status next to it, not by dimming the command.
 | `bin/ssh-reach` | Is NAME answering on port 22 within 2s? Used by the ssh aliases |
 | `lib/net.sh` | `sys net` — network shares from `config/net`, mounted through Finder |
 | `lib/nas.sh` | `sys nas` — the NAS's reachability, disk, shares and Tailscale, from `config/nas` |
+| `lib/tailscale.sh` | `sys tailscale up` — Tailscale on here, then on every machine this one may log into |
 | `bin/ai-brief` | `sys ai` — this file's companion, generated: commands, config, machines, state |
 | `docs/ubuntu-box.md` | How the Ubuntu box was built — vendor repos `sys` does not manage |
 | `docs/nas.md` | The Synology — accounts, shares, Time Machine, Tailscale, and their failure modes |
@@ -152,6 +153,20 @@ by path in `ssh_share_key`.
 `sync_backup` (system → repo for files the repo already tracks), dump Cursor
 extensions, `bin/dump-dock`, then `git add -A`, commit "Update config files",
 `push_repo`.
+
+### `sys tailscale up`
+`tailscale_up_all` in `lib/tailscale.sh`. This machine first, then the targets
+`ssh_sync_others` would pick (every machine whose "from" column names this one),
+skipping any that `bin/ssh-reach` cannot find on either route. One POSIX `sh`
+script, `ts_script`, does the work: it runs locally through `sh -s`, and on
+each target over one bounded ssh login (`timed 60`), with the script on stdin
+so nothing needs quoting. It finds the Mac app's CLI, the Synology package's,
+or `tailscale` on PATH; uses `sudo -n` off the Mac; and answers with one word
+on its last line, which `ts_report` turns into output. `tailscale up` is run
+with no flags on purpose: with none it reconnects with the saved settings,
+whereas any flag makes it demand every non-default flag (the Ubuntu box
+advertises an exit node). No-sys machines get `check` mode only — interactive
+sudo is the user's to run — and the printed command for them.
 
 ### `sys doctor`
 Read-only table: tools present, mise versions, App Store reachable, SSH key

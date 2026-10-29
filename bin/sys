@@ -9,6 +9,7 @@ source "$ROOT_DIR/lib/setup.sh"
 source "$ROOT_DIR/lib/ssh.sh"
 source "$ROOT_DIR/lib/net.sh"
 source "$ROOT_DIR/lib/nas.sh"
+source "$ROOT_DIR/lib/tailscale.sh"
 
 usage() {
   # Commands in white, what they do in grey: the same scheme as every other
@@ -18,7 +19,7 @@ usage() {
   while IFS='|' read -r cmd text; do
     [[ -z "$cmd$text" ]] && { echo; continue; }
     if [[ -z "$text" ]]; then printf '%s%s%s\n' "$g" "$cmd" "$x"
-    else printf '  %s%-16s%s%s%s%s\n' "$c" "$cmd" "$x" "$g" "$(hl "$text" "$g")" "$x"
+    else printf '  %s%-18s%s%s%s%s\n' "$c" "$cmd" "$x" "$g" "$(hl "$text" "$g")" "$x"
     fi
   done <<'USAGE'
 sys setup|Set up this machine from scratch
@@ -36,6 +37,7 @@ sys ssh man|The manual
 |
 sys nas|The NAS: how to reach it, its disk, shares and Tailscale
 sys nas open|Open the NAS's web page in the browser
+sys tailscale up|Turn Tailscale on here, then on every machine this one may log into
 sys net|List the network shares; {{sys net NAME}} connects to one
 sys hostname|Set the computer name (asks, or pass one: {{sys hostname my-mac}})
 sys extras|Install the optional extras (Office, Xcode, duckdb)
@@ -390,6 +392,13 @@ case "$cmd" in
       "")    nas_show ;;
       open)  nas_open ;;
       *)     die "Unknown: sys nas $ARG — {{sys nas}} shows it, {{sys nas open}} opens its web page" ;;
+    esac
+    ;;
+
+  tailscale)
+    case "${ARGS[0]:-}" in
+      up) tailscale_up_all ;;
+      *)  die "Unknown: sys tailscale ${ARGS[0]:-} — {{sys tailscale up}} turns it on here, then on every machine this one may log into" ;;
     esac
     ;;
 
