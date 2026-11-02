@@ -35,6 +35,7 @@ it finishes it opens a fresh shell with the new config loaded.
 | `sys ssh man` | The manual |
 | `sys ssh NAME` | Log in and attach a tmux session no other connection is using |
 | `sys ssh harden` | Keys only on this machine — optional; passwords stay on otherwise |
+| `sys ssh harden tailnet` | The same, but passwords still work over Tailscale |
 | `sys nas` | The NAS: how to reach it, its disk, shares and Tailscale |
 | `sys nas open` | Open the NAS's web page |
 | `sys tailscale up` | Turn Tailscale on here, then on every machine this one may log into |
@@ -70,7 +71,8 @@ machine's host key, and write an alias for each. So `ssh mini` just works,
 as the right account, with no password: over Tailscale from anywhere, or over
 the home network with Tailscale off. A machine that is not the one it claims
 to be is refused. The aliases never offer a password; plain `ssh user@host`
-still does. Server-side passwords stay on unless you run `sys ssh harden`.
+still does. Server-side passwords stay on unless you run `sys ssh harden`; `sys ssh harden tailnet`
+keeps them for Tailscale addresses only, as a way back in if every key is lost.
 
 Private keys never leave the machine that made them. Nothing here ever types
 a password or copies a key by hand.

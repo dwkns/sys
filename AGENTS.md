@@ -297,7 +297,17 @@ block in `authorized_keys` shrinks on the next sync.
 **`sys ssh harden`** writes `/etc/ssh/sshd_config.d/00-sys-keys-only.conf` and
 restarts sshd, turning password logins off. It refuses unless at least one key
 is already let in, so a headless machine cannot lock itself out. Optional, and
-per machine.
+per machine. It also turns X11 forwarding off.
+
+**`sys ssh harden tailnet`** writes the same file plus a `Match Address` block
+that turns passwords back on for Tailscale addresses (`100.64.0.0/10`,
+`fd7a:115c:a1e0::/48`). The fallback when the screen is unusable (dwkns-ubuntu's
+is broken) and every key is lost. The drop-in is included near the top of
+`sshd_config`, so the block must end with `Match all`, or every later line of
+`sshd_config` becomes Tailscale-only. Check with `sshd -T -C
+user=X,host=x,addr=IP` for a LAN and a tailnet address. Not compatible with
+Tailscale SSH (`tailscale set --ssh`), which takes over every connection on
+the tailnet address and ignores both keys and passwords.
 
 ---
 

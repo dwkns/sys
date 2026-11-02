@@ -42,6 +42,7 @@ sys ssh|The machines sys manages, and whether each is reachable
 sys ssh all|The same, plus anything hand-written in ~/.ssh/config
 sys ssh NAME|Log in and attach a tmux session no other connection is using
 sys ssh harden|Keys only on this machine — optional, passwords stay on otherwise
+sys ssh harden tailnet|The same, but passwords still work over Tailscale
 sys ssh man|The manual
 |
 sys nas|The NAS: how to reach it, its disk, shares and Tailscale
@@ -331,7 +332,9 @@ case "$cmd" in
       row "🔑" "SSH key" "$(bad "not shared yet") ${WHITE}sys sync${RESET}${GREY} — may need a GitHub login once${RESET}"; issues=1
     fi
     # Passwords staying on is a choice, not a problem: never flagged.
-    if ssh_keys_only; then
+    if ssh_keys_only && ssh_tailnet_passwords; then
+      row "🔐" "sshd" "$(good "keys only") ${GREY}passwords over Tailscale${RESET}"
+    elif ssh_keys_only; then
       row "🔐" "sshd" "$(good "keys only")"
     else
       row "🔐" "sshd" "${GREY}keys and passwords — ${RESET}${WHITE}sys ssh harden${RESET}${GREY} turns passwords off${RESET}"
@@ -423,7 +426,7 @@ case "$cmd" in
       "")      "$ROOT_DIR/bin/ssh-hosts" ;;
       all)     "$ROOT_DIR/bin/ssh-hosts" all ;;
       man)     exec man "$ROOT_DIR/man/man1/sys.1" ;;
-      harden)  ssh_harden ;;
+      harden)  ssh_harden "${ARGS[1]:-}" ;;
       *)       ssh_connect "${ARGS[0]}" ;;
     esac
     ;;

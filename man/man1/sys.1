@@ -190,7 +190,14 @@ Optional. Turn off password logins on this machine by writing
 .I /etc/ssh/sshd_config.d/00\-sys\-keys\-only.conf
 and restarting sshd. Refuses to run until at least one machine is let in
 here, so a headless machine cannot lock itself out. Open sessions are not
-dropped. Passwords stay on unless you run this.
+dropped. Passwords stay on unless you run this. Also turns X11 forwarding off.
+.TP
+.B ssh harden tailnet
+As
+.BR "ssh harden" ,
+but passwords still work from Tailscale addresses
+.RI ( 100.64.0.0/10 ", " fd7a:115c:a1e0::/48 ).
+The fallback for a machine whose screen you cannot use if every key is lost.
 .TP
 .B tailscale up
 Turn Tailscale on here, then on every machine this one may log into according

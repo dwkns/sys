@@ -29,6 +29,7 @@ SSH_MARK_END="# <<< sys ssh <<<"
 ssh_machine()   { hostname -s 2>/dev/null | tr '[:upper:]' '[:lower:]'; }
 ssh_has_key()   { [[ -f "$SSH_KEY" && -f "$SSH_KEY.pub" ]]; }
 ssh_keys_only() { [[ -f "$SSHD_DROPIN" ]] && grep -q '^PasswordAuthentication no' "$SSHD_DROPIN" 2>/dev/null; }
+ssh_tailnet_passwords() { [[ -f "$SSHD_DROPIN" ]] && grep -q '^Match Address 100.64.0.0/10' "$SSHD_DROPIN" 2>/dev/null; }
 # This machine's sshd host key (public half), so others can pin it.
 ssh_host_pub() { [[ -r "$SSH_HOST_PUB" ]] && awk '{print $1, $2}' "$SSH_HOST_PUB"; return 0; }
 
@@ -431,8 +432,11 @@ ssh_connect() {
 
 # Lock sshd to keys only. Refuses until at least one key is let in here, so a
 # headless machine can never lock itself out. Optional: passwords stay on
-# unless you run this.
+# unless you run this. With "tailnet", passwords still work from Tailscale
+# addresses: a fallback for a machine with no screen if every key is lost.
 ssh_harden() {
+  local mode="${1:-}"
+  [[ -z "$mode" || "$mode" == "tailnet" ]] || die "Unknown: sys ssh harden $mode — {{sys ssh harden}} or {{sys ssh harden tailnet}}"
   local n; n="$(ssh_trusted_count)"
   [[ "$n" -gt 0 ]] || die "No machine is let in here yet — nothing could log in. Check config/ssh/access, then {{sys sync}}"
   grep -q '^Include /etc/ssh/sshd_config.d' /etc/ssh/sshd_config 2>/dev/null \
@@ -445,12 +449,28 @@ PasswordAuthentication no
 KbdInteractiveAuthentication no
 PubkeyAuthentication yes
 PermitRootLogin no
+X11Forwarding no
 CONF
 )"
-  if [[ -f "$SSHD_DROPIN" && "$(cat "$SSHD_DROPIN" 2>/dev/null)" == "$content" ]]; then
-    note "sshd: already keys only — $n machine(s) can log in"; return 0
+  if [[ "$mode" == "tailnet" ]]; then
+    # The file is included near the top of sshd_config, so "Match all" must end
+    # the block: without it every later line of sshd_config would only apply
+    # to Tailscale addresses.
+    content="$content
+$(cat <<'CONF'
+
+# `sys ssh harden tailnet`: passwords still work from Tailscale addresses.
+Match Address 100.64.0.0/10,fd7a:115c:a1e0::/48
+    PasswordAuthentication yes
+Match all
+CONF
+)"
   fi
-  doing "Locking sshd to keys only — $n machine(s) can log in"
+  local what="keys only"; [[ "$mode" == "tailnet" ]] && what="keys only, passwords over Tailscale"
+  if [[ -f "$SSHD_DROPIN" && "$(cat "$SSHD_DROPIN" 2>/dev/null)" == "$content" ]]; then
+    note "sshd: already $what — $n machine(s) can log in"; return 0
+  fi
+  doing "Locking sshd to $what — $n machine(s) can log in"
   if [[ "${DRY_RUN:-0}" == "1" ]]; then note "dry run: write $SSHD_DROPIN and restart sshd"; return 0; fi
   printf '%s\n' "$content" | sudo_run tee "$SSHD_DROPIN" >/dev/null || return 1
   if ! sudo_run /usr/sbin/sshd -t; then
@@ -463,5 +483,9 @@ CONF
   else
     sudo_run systemctl restart ssh 2>/dev/null || sudo_run systemctl restart sshd
   fi
-  ok "Password logins off. Only the $n machine(s) in config/ssh/access get in."
+  if [[ "$mode" == "tailnet" ]]; then
+    ok "Password logins off, except over Tailscale. Only the $n machine(s) in config/ssh/access get in with a key."
+  else
+    ok "Password logins off. Only the $n machine(s) in config/ssh/access get in."
+  fi
 }
