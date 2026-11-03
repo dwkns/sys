@@ -10,6 +10,6 @@
 # its own: just its public key in keys/dwkns-iphone.pub, added by hand.
 
 dwkns-m5         dwkns     dwkns-mini  dwkns-iphone
-dwkns-mini       dwkns     dwkns-m5  dwkns-ubuntu  dwkns-iphone
+dwkns-mini       dwkns     dwkns-m5  dwkns-iphone
 dwkns-ubuntu     admin     dwkns-m5  dwkns-mini  dwkns-iphone
 dwkns-nas        dwkns     dwkns-m5  dwkns-mini  dwkns-ubuntu  dwkns-iphone
