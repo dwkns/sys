@@ -146,7 +146,7 @@ All three reach the Ubuntu box as shared dotfiles.
 
 Already at a prompt — say from a phone app, which does not use your shell's
 `ssh` — type `t` (or `t NAME`) to go into tmux the same way. Detaching then
-ends the connection.
+ends the connection. `t list` shows the sessions running on that machine.
 
 ## Starting over
 

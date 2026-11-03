@@ -485,7 +485,8 @@ and tmux will not start without one. `attach` picks the session: NAME if given
 `ssh_connect` (`sys ssh HOST`) calls the same rule. The same file defines
 `t [NAME]`, which `exec`s `attach` from an existing prompt (for phone apps that
 cannot run a startup command for free); it refuses inside tmux, because the
-exec'd tmux would refuse to nest and the pane would close.
+exec'd tmux would refuse to nest and the pane would close. `t list` lists the
+sessions and is checked first, so it works inside tmux too.
 
 **A new command or setup step.** Add the `case` branch in `bin/sys`, bump
 `TOTAL` if it is a numbered setup step, and update **both** `README.md` and

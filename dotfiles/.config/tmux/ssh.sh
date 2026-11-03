@@ -15,7 +15,8 @@
 # `t [NAME]` is for a login that gave a plain prompt, such as a phone app that
 # does not use this shell's ssh. It replaces the shell with tmux, so detaching
 # ends the connection, just as `ssh HOST tmux` does. Inside tmux it refuses:
-# exec'ing a tmux that will not nest would close the pane.
+# exec'ing a tmux that will not nest would close the pane. `t list` shows the
+# sessions instead, and works anywhere — so no session can be called "list".
 #
 # Installed by sys from ~/.sys/dotfiles/.config/tmux/ssh.sh.
 
@@ -32,6 +33,11 @@ ssh() {
 }
 
 t() {
+  if [ "${1-}" = list ]; then
+    tmux list-sessions -F '#{session_name}  #{session_windows} window(s)#{?session_attached,  attached,}' 2>/dev/null ||
+      echo "t: no tmux sessions"
+    return 0
+  fi
   if [ -n "${TMUX-}" ]; then
     echo "t: already in tmux (Ctrl-b s switches session)" >&2; return 1
   fi
