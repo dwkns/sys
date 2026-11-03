@@ -43,9 +43,6 @@ these change, and a stale keyring command is worse than none.
   - `deploy-web-1`: Lift, from the image `lift-backend:latest`
     (compose files in `~/lift/deploy`).
   - `youpod-podcast-1`: YouPods (compose files in `~/youpod`).
-- `mbp-status.service`: the laptop's hardware status page on port 80
-  (`~/mbp-status/server.py`). The firewall lets it through on the home
-  network and the tailnet only, never publicly.
 - `cloudflared.service`: the tunnel that publishes the public routes (below).
 - `tailscaled`: Tailscale.
 - Cron at 03:30: `~/bin/lift-backup-to-github.sh`, the Lift backup. Lift's
@@ -115,15 +112,14 @@ them alone.
 ## Security settings
 
 **Firewall (ufw)**, active. Incoming is denied by default. Allowed: everything
-on `tailscale0`; on the Ethernet port only 22/tcp (ssh), 80/tcp (status page)
-and 5353/udp (mDNS, for `dwkns-ubuntu.local`); and 41641/udp for Tailscale's
+on `tailscale0`; on the Ethernet port only 22/tcp (ssh) and
+5353/udp (mDNS, for `dwkns-ubuntu.local`); and 41641/udp for Tailscale's
 direct connections. To rebuild it:
 
 ```bash
 sudo ufw default deny incoming && sudo ufw default allow outgoing
 sudo ufw allow in on tailscale0
 sudo ufw allow in on enx9c69d3ac296c to any port 22 proto tcp
-sudo ufw allow in on enx9c69d3ac296c to any port 80 proto tcp
 sudo ufw allow in on enx9c69d3ac296c to any port 5353 proto udp
 sudo ufw allow 41641/udp && sudo ufw enable
 ```
