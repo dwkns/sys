@@ -142,9 +142,11 @@ fixed set and pick one each time.
 marked block sync keeps in `~/.bashrc` on the Ubuntu box; anything else you
 pass to `ssh` goes to the real one untouched. The session rule is
 `dotfiles/.config/tmux/attach` and the config `dotfiles/.config/tmux/tmux.conf`.
-All three reach the Ubuntu box as shared dotfiles. A phone app does not use
-your shell, so give it a second host entry that runs
-`bash ~/.config/tmux/attach` when it connects.
+All three reach the Ubuntu box as shared dotfiles.
+
+Already at a prompt — say from a phone app, which does not use your shell's
+`ssh` — type `t` (or `t NAME`) to go into tmux the same way. Detaching then
+ends the connection.
 
 ## Starting over
 

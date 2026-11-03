@@ -193,6 +193,11 @@ on Linux; any other use of
 .B ssh
 reaches the real one. The session rule is
 .IR ~/.config/tmux/attach .
+From a prompt you are already at, such as a phone app's,
+.B t
+or
+.BI "t " SESSION
+goes into tmux the same way; detaching then ends the connection.
 .B Ctrl\-b d
 detaches and leaves the session running.
 .TP
@@ -395,7 +400,9 @@ Linux machines.
 .I ~/.config/tmux/ssh.sh
 The
 .B ssh HOST tmux
-shell function. Also copied to Linux machines.
+and
+.B t
+shell functions. Also copied to Linux machines.
 .TP
 .I ~/.sys/.drift/
 System files replaced by the last sync. Not tracked by git.

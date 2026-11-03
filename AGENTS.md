@@ -482,7 +482,10 @@ never see it — keep it that narrow. It runs `ssh -t HOST 'bash
 ~/.config/tmux/attach [NAME]'`; `-t` because ssh gives a command no terminal
 and tmux will not start without one. `attach` picks the session: NAME if given
 (`new-session -A`), else the first one with no client attached, else a new one.
-`ssh_connect` (`sys ssh HOST`) calls the same rule.
+`ssh_connect` (`sys ssh HOST`) calls the same rule. The same file defines
+`t [NAME]`, which `exec`s `attach` from an existing prompt (for phone apps that
+cannot run a startup command for free); it refuses inside tmux, because the
+exec'd tmux would refuse to nest and the pane would close.
 
 **A new command or setup step.** Add the `case` branch in `bin/sys`, bump
 `TOTAL` if it is a numbered setup step, and update **both** `README.md` and
