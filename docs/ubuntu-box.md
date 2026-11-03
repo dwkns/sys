@@ -12,10 +12,10 @@ disk dies, this is the rebuild list.
 
 1. Updates the repo in `~/.sys`.
 2. Installs anything missing from `config/apt-packages`.
-3. Copies the shared dotfiles (`.config/tmux/tmux.conf` and
-   `.config/tmux/attach`) — not the Mac ones, which are all Homebrew, macOS
-   paths and `duti` — and keeps a marked block in `~/.bashrc` that attaches
-   tmux on an interactive ssh login.
+3. Copies the shared dotfiles (`.config/tmux/tmux.conf`,
+   `.config/tmux/attach` and `.config/tmux/ssh.sh`) — not the Mac ones, which
+   are all Homebrew, macOS paths and `duti` — and keeps a marked block in
+   `~/.bashrc` that loads `ssh HOST tmux [NAME]`.
 4. Applies SSH access from `config/ssh/access`.
 
 No Homebrew, no mise, no macOS defaults. Install it with:

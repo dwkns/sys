@@ -33,7 +33,7 @@ it finishes it opens a fresh shell with the new config loaded.
 | `sys ssh` | The machines sys manages, and whether each is reachable right now |
 | `sys ssh all` | The same, plus anything hand-written in `~/.ssh/config` |
 | `sys ssh man` | The manual |
-| `sys ssh NAME` | Log in and attach a tmux session no other connection is using |
+| `sys ssh NAME` | Log in straight into tmux, like `ssh NAME tmux` |
 | `sys ssh harden` | Keys only on this machine — optional; passwords stay on otherwise |
 | `sys ssh harden tailnet` | The same, but passwords still work over Tailscale |
 | `sys nas` | The NAS: how to reach it, its disk, shares and Tailscale |
@@ -118,22 +118,33 @@ there, so the run prints the command for you to type instead.
 
 ## Sessions that survive a dropped connection
 
-Every interactive ssh login lands in tmux: `sys ssh mini`, plain
-`ssh mini`, or a terminal app on your phone. Close the lid, lose signal, or
-quit the app: the session keeps running on the machine, and the next login
-picks it up exactly where you left it. `Ctrl-b d` detaches on purpose and
-leaves you at a plain shell.
+You choose when you connect:
 
-A login takes a session that no other connection is using, or starts a new
-one. So each terminal tab has a session of its own, and a tab whose connection
-dropped gets its own back — it is the one with nobody attached. Two tabs that
-drop together may swap. Scripted ssh (`sys sync all`, `scp`, editors) has no
-terminal and never lands in tmux.
+| | |
+|---|---|
+| `ssh mini` | An ordinary prompt |
+| `ssh mini tmux` | A tmux session no other connection is using, or a new one |
+| `ssh mini tmux work` | The session called `work`, started if there is none |
+| `sys ssh mini` | The same as `ssh mini tmux` |
 
-The rule is `dotfiles/.config/tmux/attach`, run from the end of
-`dotfiles/.zshrc` on the Macs and from a marked block sync keeps in
-`~/.bashrc` on the Ubuntu box. The config is `dotfiles/.config/tmux/tmux.conf`.
-Both reach the Ubuntu box as shared dotfiles.
+In tmux, close the lid, lose signal, or quit the app: the session keeps
+running on the machine, and the next `ssh mini tmux` picks it up exactly where
+you left it. `Ctrl-b d` detaches on purpose and leaves the session running.
+
+Without a name, a login takes a session that no other connection is using, or
+starts a new one. So each terminal tab has a session of its own, and a tab
+whose connection dropped gets its own back — it is the one with nobody
+attached. Two tabs that drop together may swap. Give sessions names to keep a
+fixed set and pick one each time.
+
+`ssh HOST tmux [NAME]` is a small shell function,
+`dotfiles/.config/tmux/ssh.sh`, sourced by `.zshrc` on the Macs and by a
+marked block sync keeps in `~/.bashrc` on the Ubuntu box; anything else you
+pass to `ssh` goes to the real one untouched. The session rule is
+`dotfiles/.config/tmux/attach` and the config `dotfiles/.config/tmux/tmux.conf`.
+All three reach the Ubuntu box as shared dotfiles. A phone app does not use
+your shell, so give it a second host entry that runs
+`bash ~/.config/tmux/attach` when it connects.
 
 ## Starting over
 

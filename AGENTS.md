@@ -472,14 +472,17 @@ command in `bash -lc` for exactly this reason, and it silently handed back a
 plain shell instead of tmux until it did. Test it in a pty and check what you
 actually landed in.
 
-**tmux on ssh login.** `dotfiles/.config/tmux/attach` picks the session: the
-first one with no client attached, else a new one. Three callers: the hook at
-the end of `dotfiles/.zshrc` (Macs), the marked block `install_bashrc_hook`
-keeps in `~/.bashrc` (Linux), and `ssh_connect`. The hooks need an interactive
-shell, `$SSH_CONNECTION` set, `$TMUX` empty and a tty on stdin and stdout, so
-`sys sync all`, `scp` and editors probing the shell never land in tmux. Keep
-those guards if you touch it: a login that hangs in tmux breaks every scripted
-ssh call.
+**tmux over ssh.** Opt-in since November 2026: a plain `ssh HOST` is an
+ordinary prompt; there is no login hook any more. `ssh HOST tmux [NAME]` is a
+function in `dotfiles/.config/tmux/ssh.sh`, sourced by `dotfiles/.zshrc` (Macs)
+and by the marked block `install_bashrc_hook` keeps in `~/.bashrc` (Linux; it
+also deletes the old auto-attach block). It catches only that exact shape and
+hands everything else to `command ssh`, so scripts, `scp` and `sys sync all`
+never see it — keep it that narrow. It runs `ssh -t HOST 'bash
+~/.config/tmux/attach [NAME]'`; `-t` because ssh gives a command no terminal
+and tmux will not start without one. `attach` picks the session: NAME if given
+(`new-session -A`), else the first one with no client attached, else a new one.
+`ssh_connect` (`sys ssh HOST`) calls the same rule.
 
 **A new command or setup step.** Add the `case` branch in `bin/sys`, bump
 `TOTAL` if it is a numbered setup step, and update **both** `README.md` and

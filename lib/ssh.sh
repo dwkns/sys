@@ -421,8 +421,8 @@ ssh_connect() {
   # Through a login shell: a non-interactive ssh command gets a bare PATH, so
   # Homebrew's tmux would look missing and this would quietly hand back a
   # plain shell. No tmux there at all? Then a login shell, not an error.
-  # The session is picked by ~/.config/tmux/attach, the same rule a plain ssh
-  # login uses; a machine not synced since that file arrived gets `main`.
+  # The session is picked by ~/.config/tmux/attach, the same rule `ssh HOST tmux`
+  # uses; a machine not synced since that file arrived gets `main`.
   remote='exec bash -lc '"'"'command -v tmux >/dev/null 2>&1 || exec "$SHELL" -l; [ -r ~/.config/tmux/attach ] && exec bash ~/.config/tmux/attach; exec tmux new -A -s main'"'"''
 
   if [[ "${DRY_RUN:-0}" == "1" ]]; then note "dry run: connect to $a and attach tmux"; return 0; fi

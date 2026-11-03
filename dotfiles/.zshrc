@@ -57,7 +57,7 @@ export CLAUDE_CODE_OAUTH_TOKEN="$(security find-generic-password -a "$USER" -s c
 
 # ── Config ───────────────────────────────────────────────────────────────────
 # Guarded so a missing repo degrades quietly instead of erroring every shell.
-for f in "$HOME/.sys/lib/common.sh" "$HOME/.aliases" "$HOME/.projects"; do
+for f in "$HOME/.sys/lib/common.sh" "$HOME/.aliases" "$HOME/.projects" "$HOME/.config/tmux/ssh.sh"; do
   [[ -r "$f" ]] && source "$f"
 done
 
@@ -66,11 +66,3 @@ if [[ -z "$SSH_CONNECTION" && "$PWD" == "$HOME" && "${TERM_PROGRAM:-}" != (vscod
   cd ~/Desktop
 fi
 
-# ── tmux over SSH ────────────────────────────────────────────────────────────
-# An interactive ssh login lands in a tmux session no other connection is
-# using, so a dropped connection loses nothing. The rule is in
-# ~/.config/tmux/attach. Needs a terminal on both ends, so tools that run the
-# shell without one are left alone. Ctrl-b d leaves you at a plain shell.
-if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -t 0 && -t 1 && -r ~/.config/tmux/attach ]]; then
-  bash ~/.config/tmux/attach
-fi

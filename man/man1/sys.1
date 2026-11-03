@@ -174,13 +174,24 @@ without one is signed in on the spot, once, with a code and a browser page.
 Log in to NAME (the alias or the full machine name from
 .IR config/ssh/access )
 and attach a tmux session that no other connection is using, or start one.
-A plain interactive
+The same as
+.BR "ssh NAME tmux" .
+A plain
+.B ssh NAME
+gives an ordinary prompt.
+.B ssh NAME tmux SESSION
+attaches the session called SESSION, starting it if there is none. That form
+of
 .B ssh
-login does the same, through a hook at the end of
+is a shell function in
+.IR ~/.config/tmux/ssh.sh ,
+sourced by
 .I ~/.zshrc
-on a Mac and a marked block sync keeps in
+on a Mac and by a marked block sync keeps in
 .I ~/.bashrc
-on Linux. The rule is
+on Linux; any other use of
+.B ssh
+reaches the real one. The session rule is
 .IR ~/.config/tmux/attach .
 .B Ctrl\-b d
 detaches and leaves the session running.
@@ -374,8 +385,17 @@ Optional App Store apps, installed only by
 Copied into the home directory.
 .TP
 .I ~/.config/tmux/attach
-Picks the tmux session an ssh login attaches to: one nobody else is using, or
-a new one. Also copied to Linux machines.
+Picks the tmux session for
+.B ssh HOST tmux
+and
+.BR "sys ssh" :
+the one named, or one nobody else is using, or a new one. Also copied to
+Linux machines.
+.TP
+.I ~/.config/tmux/ssh.sh
+The
+.B ssh HOST tmux
+shell function. Also copied to Linux machines.
 .TP
 .I ~/.sys/.drift/
 System files replaced by the last sync. Not tracked by git.

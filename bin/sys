@@ -40,7 +40,7 @@ sys ai|Everything an AI needs to know about this repo, generated
 |
 sys ssh|The machines sys manages, and whether each is reachable
 sys ssh all|The same, plus anything hand-written in ~/.ssh/config
-sys ssh NAME|Log in and attach a tmux session no other connection is using
+sys ssh NAME|Log in straight into tmux, like {{ssh NAME tmux}}
 sys ssh harden|Keys only on this machine — optional, passwords stay on otherwise
 sys ssh harden tailnet|The same, but passwords still work over Tailscale
 sys ssh man|The manual
