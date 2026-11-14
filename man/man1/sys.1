@@ -206,6 +206,13 @@ reach one from another machine.
 The tmux sessions on this machine: the name, what is running in each, the
 folder it is in, and whether anyone is attached.
 .TP
+.B tmux claude
+Start the Claude Code sessions listed in
+.IR config/claude\-sessions ,
+on whichever machine the list names: here, or over ssh from a machine that
+may log in there. Sessions already running are left alone. The same thing
+happens by itself at login; this brings them back without a restart.
+.TP
 .BI "tmux " SESSION
 Go into the session called SESSION. It must exist, and the name must match
 exactly: a mistyped name is an error, not a new session. Inside tmux it

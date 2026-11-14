@@ -5,6 +5,7 @@
 #   sys tmux        a short guide
 #   sys tmux list   the sessions on this machine
 #   sys tmux NAME   go into the session called NAME
+#   sys tmux claude start the Claude Code sessions that should always be running
 #
 # Nothing here changes what `tmux` itself does. NAME must already exist: a
 # mistyped name is an error, not a new session left running.
@@ -56,6 +57,45 @@ tmux_attach() {
   exec tmux attach-session -t "=$name"
 }
 
+# `sys tmux claude`: start the Claude Code sessions in config/claude-sessions,
+# on whichever machine the list names — here, by running bin/claude-sessions,
+# and on any other machine over ssh, so it works from a laptop when the
+# sessions live on the mini. Sessions already running are left alone, so it is
+# safe at any time. The login LaunchAgent does the same thing after a restart;
+# this is for when you want them back without one.
+tmux_claude() {
+  local list="$ROOT_DIR/config/claude-sessions" me machines m a rc=0
+  [[ -r "$list" ]] || die "No config/claude-sessions in the repo"
+  me="$(ssh_machine)"
+  machines="$(sed 's/#.*//' "$list" | awk -F'|' 'NF >= 3 { gsub(/[ \t]/, "", $1); if ($1 != "" && !seen[$1]++) print $1 }')"
+  [[ -n "$machines" ]] || { note "config/claude-sessions lists no sessions"; return 0; }
+
+  for m in $machines; do
+    if [[ "$m" == "$me" ]]; then
+      "$ROOT_DIR/bin/claude-sessions" || rc=1        # DRY_RUN reaches it through the environment
+      continue
+    fi
+    a="$(ssh_alias "$m")"
+    header "🧵" "Claude sessions on $a" "" "$WHITE"
+    if ! "$ROOT_DIR/bin/ssh-reach" "$m" && ! "$ROOT_DIR/bin/ssh-reach" "$m.local"; then
+      warn "$a is not reachable right now"; rc=1; continue
+    fi
+    # A login that never completes must not hang silently (see `timed`).
+    if ! timed 15 ssh -o BatchMode=yes "$a" true 2>/dev/null; then
+      warn "$a: could not log in — is this machine let in there?"; rc=1; continue
+    fi
+    # -t so the output there is drawn as it would be at its own prompt.
+    if ssh -t -o BatchMode=yes -o ConnectTimeout=8 "$a" \
+         "test -x ~/.sys/bin/claude-sessions || { echo 'claude-sessions is not installed here: run sys sync on it'; exit 99; }; DRY_RUN=${DRY_RUN:-0} exec ~/.sys/bin/claude-sessions"; then
+      :
+    else
+      [[ $? == 99 ]] || warn "$a: some sessions did not start (see above)"
+      rc=1
+    fi
+  done
+  return $rc
+}
+
 tmux_guide() {
   local c="$WHITE" g="$GREY" x="$RESET" cmd text
   printf '%stmux%s %s— a session keeps running on the machine when you disconnect%s\n\n' "$WHITE" "$RESET" "$GREY" "$RESET"
@@ -68,6 +108,7 @@ tmux_guide() {
   done <<'GUIDE'
 sys tmux list^The sessions on this machine
 sys tmux NAME^Go into the session called NAME
+sys tmux claude^Start the Claude sessions that should always be running
 tmux new -s NAME^Start a new session called NAME
 tmux^Start a new session, named with a number
 ^

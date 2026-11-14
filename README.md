@@ -39,6 +39,7 @@ it finishes it opens a fresh shell with the new config loaded.
 | `sys tmux` | A short guide to tmux |
 | `sys tmux list` | The tmux sessions on this machine |
 | `sys tmux NAME` | Go into the session called NAME |
+| `sys tmux claude` | Start the Claude sessions that should always be running, wherever they live |
 | `sys nas` | The NAS: how to reach it, its disk, shares and Tailscale |
 | `sys nas open` | Open the NAS's web page |
 | `sys tailscale up` | Turn Tailscale on here, then on every machine this one may log into |
@@ -176,9 +177,11 @@ machine it starts a tmux session in that folder and resumes the conversation
 with that title, the one `/rename` gave it. `sys tmux frame` on the
 mini, or `ssh mini tmux frame` from elsewhere, goes into it.
 
-A session that already exists is left alone, so running `claude-sessions` by
-hand at any time is safe: it starts whichever are missing. `--dry-run` says
-what it would start. With no title on the line, or none that matches, it
+To bring them back without a restart, `sys tmux claude`. It runs the same
+script on whichever machine the list names: here if that is this one, over ssh
+if not, so it works from a laptop. A session that already exists is left
+alone, so it is safe at any time: it starts whichever are missing. `--dry-run`
+says what it would start. With no title on the line, or none that matches, it
 resumes whichever conversation was used last in the folder. What it did at the
 last login is in `~/Library/Logs/claude-sessions.log`.
 

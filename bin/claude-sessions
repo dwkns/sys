@@ -3,6 +3,7 @@
 # tmux session of its own, resuming the conversation named there.
 #
 #   claude-sessions            start whichever are not already running
+#   sys tmux claude            the same, on whichever machine the list names
 #   claude-sessions --dry-run  say what would be started, start nothing
 #
 # A tmux session that already exists is left alone, whatever is in it, so this
@@ -25,8 +26,11 @@ source "$ROOT_DIR/lib/common.sh"
 LIST="$ROOT_DIR/config/claude-sessions"
 [[ -r "$LIST" ]] || { note "No config/claude-sessions — nothing to start"; exit 0; }
 
-# launchd hands a job a bare PATH; tmux is Homebrew's.
+# launchd, and an ssh command, hand over a bare PATH; tmux is Homebrew's.
 PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# Neither gives a locale either, and a tmux server started without one draws
+# ASCII in every session it ever holds.
+[[ -n "${LC_ALL:-}${LANG:-}" ]] || export LANG=en_GB.UTF-8
 me="$(hostname -s 2>/dev/null | tr '[:upper:]' '[:lower:]')"
 
 trim() { printf '%s' "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }

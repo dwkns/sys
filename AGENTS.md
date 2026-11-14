@@ -492,7 +492,8 @@ already on the machine: no argument prints a guide, `list` shows the sessions,
 anything else is a session name to go into. It only attaches to a session that
 exists, matched exactly (`-t "=NAME"`; without the `=` tmux takes `fr` to mean
 `frame`), and inside tmux it runs `switch-client`, because attaching would nest.
-It never creates a session and plain `tmux` is left alone. The ssh file also
+It never creates a session and plain `tmux` is left alone. `list`, `ls` and
+`claude` are taken, so a session cannot be reached by those names. The ssh file also
 defined a `t [NAME]` / `t list` shortcut, 3–14 November 2026; it was removed as
 one way into tmux too many. Do not add it back, and do not add another.
 
@@ -512,7 +513,11 @@ each transcript under `~/.claude/projects/<folder, non-alphanumerics as ->/`
 shell in the folder and *types* the command with `send-keys` rather than
 running claude as the pane's command: the shell is what puts mise's `claude` on
 PATH and reads the token from the Keychain, and a pane whose command exits
-closes. It is not a `sys` command; it is on PATH as `claude-sessions`.
+closes. `sys tmux claude` (`tmux_claude` in `lib/tmux.sh`) runs it on every
+machine the list names: directly when that is this one, otherwise over ssh
+with the same reachability and `timed` login checks as `sys sync all`. The ssh
+command has no login shell, so the script sets its own PATH and, because a
+tmux server started without a locale draws ASCII for good, its own `LANG`.
 
 It runs at login from `dotfiles/Library/LaunchAgents/com.dwkns.claude-sessions.plist`,
 the first LaunchAgent in the repo. That file goes to every Mac as an ordinary
