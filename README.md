@@ -144,9 +144,39 @@ pass to `ssh` goes to the real one untouched. The session rule is
 `dotfiles/.config/tmux/attach` and the config `dotfiles/.config/tmux/tmux.conf`.
 All three reach the Ubuntu box as shared dotfiles.
 
-Already at a prompt — say from a phone app, which does not use your shell's
-`ssh` — type `t` (or `t NAME`) to go into tmux the same way. Detaching then
-ends the connection. `t list` shows the sessions running on that machine.
+Already at a prompt on the machine — say from a phone app, which does not use
+your shell's `ssh` — use tmux itself:
+
+| | |
+|---|---|
+| `tmux ls` | List the sessions running on this machine |
+| `tmux attach -t frame` | Go into the session called `frame` |
+| `tmux` | Start a new session |
+
+## Claude sessions that come back after a restart
+
+`config/claude-sessions` lists the Claude Code conversations that should
+always be running, one per line:
+
+```
+# machine  | tmux session | folder              | conversation to resume
+dwkns-mini | frame        | ~/Developer/Frame   | Frame - Main
+```
+
+At every login — which is what a restart ends in on the mini, since it logs in
+by itself — a LaunchAgent runs `bin/claude-sessions`. For each line naming this
+machine it starts a tmux session in that folder and resumes the conversation
+with that title, the one `/rename` gave it. `tmux attach -t frame` on the
+mini, or `ssh mini tmux frame` from elsewhere, goes into it.
+
+A session that already exists is left alone, so running `claude-sessions` by
+hand at any time is safe: it starts whichever are missing. `--dry-run` says
+what it would start. With no title on the line, or none that matches, it
+resumes whichever conversation was used last in the folder. What it did at the
+last login is in `~/Library/Logs/claude-sessions.log`.
+
+These sessions have nobody attached, so a plain `ssh mini tmux` (no name) lands
+in the first of them rather than starting a fresh one.
 
 ## Starting over
 
@@ -186,6 +216,8 @@ lib/tailscale.sh             `sys tailscale up` — Tailscale on here and on the
 bin/ssh-access               the one command for a machine that does not run sys
 bin/ssh-reach                Tailscale name or NAME.local? the aliases ask this
 bin/ai-brief                 `sys ai` — the repo explained, generated from the repo
+bin/claude-sessions          starts the Claude Code sessions in tmux; run at login by a LaunchAgent
+config/claude-sessions       which conversations those are, and on which machine
 config/ssh/access            who may log in where, and as which account
 config/ssh/no-sys            machines that cannot run sys; their access is pushed to them
 config/net                   network shares for `sys net`

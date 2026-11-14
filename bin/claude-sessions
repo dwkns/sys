@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# Start the Claude Code sessions listed in config/claude-sessions, each in a
+# tmux session of its own, resuming the conversation named there.
+#
+#   claude-sessions            start whichever are not already running
+#   claude-sessions --dry-run  say what would be started, start nothing
+#
+# A tmux session that already exists is left alone, whatever is in it, so this
+# is safe to run at any time. Run at login by the LaunchAgent in
+# dotfiles/Library/LaunchAgents, which is how the sessions come back after a
+# restart; a line only acts on the machine it names.
+#
+# Each session is an ordinary login shell in the project folder with the claude
+# command typed into it, not claude run directly: the shell is what loads mise
+# (where claude lives) and the login token, and it means quitting claude leaves
+# a prompt in the right folder rather than closing the session.
+set -uo pipefail
+
+_self="${BASH_SOURCE[0]}"
+[[ -L "$_self" ]] && _self="$(readlink "$_self")"
+export ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "$_self")/.." && pwd -P)}"
+source "$ROOT_DIR/lib/common.sh"
+
+[[ "${1:-}" == "--dry-run" || "${1:-}" == "--dryrun" ]] && DRY_RUN=1
+LIST="$ROOT_DIR/config/claude-sessions"
+[[ -r "$LIST" ]] || { note "No config/claude-sessions — nothing to start"; exit 0; }
+
+# launchd hands a job a bare PATH; tmux is Homebrew's.
+PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+me="$(hostname -s 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+
+trim() { printf '%s' "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
+
+# The lines for this machine, as "name|folder|title".
+mine="$(sed 's/#.*//' "$LIST" | awk -F'|' -v me="$me" '
+  { for (i = 1; i <= NF; i++) gsub(/^[ \t]+|[ \t]+$/, "", $i) }
+  NF >= 3 && $1 == me { print $2 "|" $3 "|" $4 }')"
+[[ -n "$mine" ]] || exit 0          # another machine's list: say nothing
+
+has_cmd tmux || { error "tmux is not installed — {{brew install tmux}}"; exit 1; }
+
+# The id of the newest conversation in a folder carrying this title. Claude
+# keeps one transcript per conversation under ~/.claude/projects/<folder with
+# every non-alphanumeric turned into ->, and records each rename in it; the
+# last rename is the title.
+conversation_id() {
+  local dir="$1" title="$2" store f last
+  store="$HOME/.claude/projects/$(printf '%s' "$dir" | sed 's/[^A-Za-z0-9]/-/g')"
+  [[ -d "$store" ]] || return 1
+  while IFS= read -r f; do
+    last="$(grep -a -o '"customTitle":"[^"]*"' "$f" 2>/dev/null | tail -1)"
+    if [[ "$last" == "\"customTitle\":\"$title\"" ]]; then
+      basename "$f" .jsonl
+      return 0
+    fi
+  done < <(ls -t "$store"/*.jsonl 2>/dev/null)
+  return 1
+}
+
+# Straight after a restart the network can be a few seconds behind the login.
+# Wait for it, briefly, then carry on regardless: claude copes, it is just
+# cleaner to start it connected.
+wait_for_network() {
+  local i
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+    nc -z -G 2 api.anthropic.com 443 >/dev/null 2>&1 && return 0
+    sleep 3
+  done
+  warn "No network after a minute — starting anyway"
+}
+
+started=0 waited=0 rc=0
+while IFS='|' read -r name dir title; do
+  [[ -n "$name" ]] || continue
+  dir="${dir/#\~/$HOME}"
+
+  case "$name" in
+    *[!A-Za-z0-9_-]*) warn "$name: a tmux session name is letters, digits, - and _ only — skipped"; rc=1; continue ;;
+  esac
+  if tmux has-session -t "=$name" 2>/dev/null; then
+    note "$name: already running — left alone"
+    continue
+  fi
+  if [[ ! -d "$dir" ]]; then
+    warn "$name: $dir is not there — skipped"; rc=1
+    continue
+  fi
+
+  cmd="claude --continue"; what="the last conversation used in $dir"
+  if [[ -n "$title" ]]; then
+    if id="$(conversation_id "$dir" "$title")"; then
+      cmd="claude --resume $id"; what="\"$title\""
+    else
+      warn "$name: no conversation called \"$title\" in $dir — resuming the last one used instead"
+    fi
+  fi
+
+  if [[ "${DRY_RUN:-0}" == "1" ]]; then
+    note "dry run: tmux session $name in $dir, running: $cmd"
+    continue
+  fi
+
+  [[ "$waited" == "0" ]] && { wait_for_network; waited=1; }
+  doing "$name: resuming $what"
+  if tmux new-session -d -s "$name" -c "$dir" && tmux send-keys -t "=$name:" "$cmd" Enter; then
+    started=$((started + 1))
+  else
+    error "$name: tmux would not start the session"; rc=1
+  fi
+done <<<"$mine"
+
+[[ "$started" -gt 0 ]] && ok "Started $started — {{tmux attach -t NAME}} goes into one, {{tmux ls}} lists them"
+exit $rc

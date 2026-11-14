@@ -103,6 +103,7 @@ state is carried by the status next to it, not by dimming the command.
 | `lib/nas.sh` | `sys nas` — the NAS's reachability, disk, shares and Tailscale, from `config/nas` |
 | `lib/tailscale.sh` | `sys tailscale up` — Tailscale on here, then on every machine this one may log into |
 | `bin/ai-brief` | `sys ai` — this file's companion, generated: commands, config, machines, state |
+| `bin/claude-sessions` | Starts the Claude Code sessions in `config/claude-sessions` in tmux. Run at login by a LaunchAgent |
 | `docs/ubuntu-box.md` | How the Ubuntu box was built — vendor repos `sys` does not manage |
 | `docs/nas.md` | The Synology — accounts, shares, Time Machine, Tailscale, and their failure modes |
 | `man/man1/sys.1` | Man page. Keep in step with behaviour |
@@ -482,11 +483,34 @@ never see it — keep it that narrow. It runs `ssh -t HOST 'bash
 ~/.config/tmux/attach [NAME]'`; `-t` because ssh gives a command no terminal
 and tmux will not start without one. `attach` picks the session: NAME if given
 (`new-session -A`), else the first one with no client attached, else a new one.
-`ssh_connect` (`sys ssh HOST`) calls the same rule. The same file defines
-`t [NAME]`, which `exec`s `attach` from an existing prompt (for phone apps that
-cannot run a startup command for free); it refuses inside tmux, because the
-exec'd tmux would refuse to nest and the pane would close. `t list` lists the
-sessions and is checked first, so it works inside tmux too.
+`ssh_connect` (`sys ssh HOST`) calls the same rule. From a prompt already on
+the machine the user types tmux's own commands (`tmux ls`, `tmux attach -t
+NAME`, `tmux`). The file also defined a `t [NAME]` / `t list` shortcut for
+that, 3–14 November 2026; it was removed because a second way into tmux, with
+a different rule from `tmux` itself, was confusing. Do not add it back.
+
+**Claude sessions after a restart.** `config/claude-sessions` is `machine |
+tmux session | folder | conversation title`. `bin/claude-sessions` acts only on
+lines naming this machine (the hostname), skips any tmux session that already
+exists, finds the conversation id by reading the last `customTitle` record in
+each transcript under `~/.claude/projects/<folder, non-alphanumerics as ->/`
+(newest file first), and falls back to `claude --continue`. It starts a login
+shell in the folder and *types* the command with `send-keys` rather than
+running claude as the pane's command: the shell is what puts mise's `claude` on
+PATH and reads the token from the Keychain, and a pane whose command exits
+closes. It is not a `sys` command; it is on PATH as `claude-sessions`.
+
+It runs at login from `dotfiles/Library/LaunchAgents/com.dwkns.claude-sessions.plist`,
+the first LaunchAgent in the repo. That file goes to every Mac as an ordinary
+dotfile, which is why the list carries a machine column: a laptop with the same
+folders must not start sessions at login. launchd loads it at the next login;
+to load it at once, `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.dwkns.claude-sessions.plist`
+(`bootout` first to reload an edited one). Three things the plist needs, each
+learned the usual way: `bash -c` because launchd does not expand `$HOME`;
+`AbandonProcessGroup`, or launchd kills what the job left running — the tmux
+server; and `LANG`, because a launchd job has no locale and tmux would draw
+ASCII. Test it through launchd, not from an assistant's shell: a tmux server
+started there inherits that shell's environment for every later session.
 
 **A new command or setup step.** Add the `case` branch in `bin/sys`, bump
 `TOTAL` if it is a numbered setup step, and update **both** `README.md` and

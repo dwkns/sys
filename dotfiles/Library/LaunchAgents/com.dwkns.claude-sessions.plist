@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Brings the Claude Code sessions in ~/.sys/config/claude-sessions back in tmux
+  at every login, which is what a restart ends in on a machine that logs in by
+  itself. Installed on every Mac by sys sync; bin/claude-sessions does nothing
+  on a machine the list does not name.
+
+  Installed by sys from ~/.sys/dotfiles/Library/LaunchAgents.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.dwkns.claude-sessions</string>
+
+  <!-- Through bash so $HOME is expanded: launchd does not expand it itself. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-c</string>
+    <string>exec >>"$HOME/Library/Logs/claude-sessions.log" 2>&amp;1; echo "--- $(date '+%Y-%m-%d %H:%M:%S') login"; exec "$HOME/.sys/bin/claude-sessions"</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- tmux outlives this job by design. Without this launchd tidies up
+       whatever the job left running when the script exits. -->
+  <key>AbandonProcessGroup</key>
+  <true/>
+
+  <!-- A launchd job has no locale, and tmux and what runs in it would fall
+       back to ASCII and draw boxes for everything else. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key>
+    <string>en_GB.UTF-8</string>
+  </dict>
+</dict>
+</plist>

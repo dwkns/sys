@@ -10,8 +10,8 @@
 /Applications/Ghostty.app
 /System/Applications/Photos.app
 /System/Applications/Calendar.app
-/System/Applications/Contacts.app
 /Applications/Claude.app
+/System/Applications/Contacts.app
 /Applications/Cursor.app
 /Applications/Visual Studio Code.app
 /Applications/Things3.app
@@ -22,7 +22,6 @@
 /Applications/Sketch.app
 /System/Applications/Preview.app
 /Applications/MailExporter.app
-/Applications/Lift.app
 
 # Folders
 $HOME/Downloads

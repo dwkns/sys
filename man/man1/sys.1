@@ -193,13 +193,13 @@ on Linux; any other use of
 .B ssh
 reaches the real one. The session rule is
 .IR ~/.config/tmux/attach .
-From a prompt you are already at, such as a phone app's,
-.B t
-or
-.BI "t " SESSION
-goes into tmux the same way; detaching then ends the connection.
-.B t list
-shows the sessions running there.
+From a prompt you are already at, such as a phone app's, use tmux itself:
+.B tmux ls
+lists the sessions running there,
+.BI "tmux attach \-t " SESSION
+goes into one, and
+.B tmux
+alone starts a new one.
 .B Ctrl\-b d
 detaches and leaves the session running.
 .TP
@@ -391,6 +391,29 @@ Optional App Store apps, installed only by
 .I ~/.sys/dotfiles/
 Copied into the home directory.
 .TP
+.I ~/.sys/config/claude\-sessions
+The Claude Code conversations that should always be running: machine, tmux
+session name, folder, and the title of the conversation to resume.
+.TP
+.I ~/.sys/bin/claude\-sessions
+Starts each of those that names this machine in a tmux session of its own, in
+its folder, resuming the conversation with that title (or, with no title or no
+match, whichever was used last there). A session that already exists is left
+alone, so it is safe to run at any time;
+.B \-\-dry\-run
+says what it would start.
+.BI "tmux attach \-t " SESSION
+goes into one.
+.TP
+.I ~/Library/LaunchAgents/com.dwkns.claude\-sessions.plist
+Runs
+.B claude\-sessions
+at every login, so the sessions come back after a restart on a machine that
+logs in by itself. Its output goes to
+.IR ~/Library/Logs/claude\-sessions.log .
+Installed on every Mac as a dotfile; the script does nothing on a machine the
+list does not name.
+.TP
 .I ~/.config/tmux/attach
 Picks the tmux session for
 .B ssh HOST tmux
@@ -402,9 +425,7 @@ Linux machines.
 .I ~/.config/tmux/ssh.sh
 The
 .B ssh HOST tmux
-and
-.B t
-shell functions. Also copied to Linux machines.
+shell function. Also copied to Linux machines.
 .TP
 .I ~/.sys/.drift/
 System files replaced by the last sync. Not tracked by git.

@@ -6,7 +6,6 @@ bradlc.vscode-tailwindcss
 christian-kohler.npm-intellisense
 dbaeumer.vscode-eslint
 dwkns.nunjucks-11ty-plus
-garmin.monkey-c
 ionutvmi.path-autocomplete
 mechatroner.rainbow-csv
 ms-python.debugpy
