@@ -14,6 +14,7 @@ _sys() {
     'doctor:Check that everything is where it should be'
     'ai:A generated brief of this repo, for an AI'
     'ssh:List the machines you can reach over SSH'
+    'tmux:A short guide to tmux; list the sessions; go into one'
     'nas:The NAS — reach, disk, shares, Tailscale'
     'tailscale:Turn Tailscale on here and on every machine this one may log into'
     'net:List the network shares, or connect to one'
@@ -51,6 +52,12 @@ _sys() {
     tailscale)
       items=( 'up:here first, then every machine this one may log into' )
       _describe -t subcommands 'sys tailscale' items
+      ;;
+    tmux)
+      # The sessions running here, read live, and the one sub-command.
+      items=( 'list:the tmux sessions on this machine'
+              ${(f)"$(tmux list-sessions -F '#{session_name}' 2>/dev/null)"} )
+      _describe -t sessions 'tmux session' items
       ;;
     ssh)
       items=( 'harden:keys only on this machine — passwords off' )

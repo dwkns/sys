@@ -172,13 +172,12 @@ without one is signed in on the spot, once, with a code and a browser page.
 .TP
 .B ssh NAME
 Log in to NAME (the alias or the full machine name from
-.IR config/ssh/access )
-and attach a tmux session that no other connection is using, or start one.
-The same as
-.BR "ssh NAME tmux" .
-A plain
-.B ssh NAME
-gives an ordinary prompt.
+.IR config/ssh/access ).
+An ordinary prompt, the same as a plain
+.BR "ssh NAME" .
+To land in tmux instead, the shell's own
+.B ssh NAME tmux
+attaches a session that no other connection is using, or starts one, and
 .B ssh NAME tmux SESSION
 attaches the session called SESSION, starting it if there is none. That form
 of
@@ -193,15 +192,26 @@ on Linux; any other use of
 .B ssh
 reaches the real one. The session rule is
 .IR ~/.config/tmux/attach .
-From a prompt you are already at, such as a phone app's, use tmux itself:
-.B tmux ls
-lists the sessions running there,
-.BI "tmux attach \-t " SESSION
-goes into one, and
+From a prompt you are already at, such as a phone app's, see
 .B tmux
-alone starts a new one.
+below.
 .B Ctrl\-b d
 detaches and leaves the session running.
+.TP
+.B tmux
+A short guide to tmux: starting a session, the keys inside one, and how to
+reach one from another machine.
+.TP
+.B tmux list
+The tmux sessions on this machine: the name, what is running in each, the
+folder it is in, and whether anyone is attached.
+.TP
+.BI "tmux " SESSION
+Go into the session called SESSION. It must exist, and the name must match
+exactly: a mistyped name is an error, not a new session. Inside tmux it
+switches you to that session rather than nesting one tmux in another. Plain
+.B tmux
+is untouched and starts a new session, as it always does.
 .TP
 .B ssh harden
 Optional. Turn off password logins on this machine by writing
@@ -402,7 +412,7 @@ match, whichever was used last there). A session that already exists is left
 alone, so it is safe to run at any time;
 .B \-\-dry\-run
 says what it would start.
-.BI "tmux attach \-t " SESSION
+.BI "sys tmux " SESSION
 goes into one.
 .TP
 .I ~/Library/LaunchAgents/com.dwkns.claude\-sessions.plist
@@ -416,9 +426,7 @@ list does not name.
 .TP
 .I ~/.config/tmux/attach
 Picks the tmux session for
-.B ssh HOST tmux
-and
-.BR "sys ssh" :
+.BR "ssh HOST tmux" :
 the one named, or one nobody else is using, or a new one. Also copied to
 Linux machines.
 .TP

@@ -19,6 +19,7 @@ source "$ROOT_DIR/lib/ssh.sh"
 source "$ROOT_DIR/lib/net.sh"
 source "$ROOT_DIR/lib/nas.sh"
 source "$ROOT_DIR/lib/tailscale.sh"
+source "$ROOT_DIR/lib/tmux.sh"
 
 usage() {
   # Commands in white, what they do in grey: the same scheme as every other
@@ -40,10 +41,14 @@ sys ai|Everything an AI needs to know about this repo, generated
 |
 sys ssh|The machines sys manages, and whether each is reachable
 sys ssh all|The same, plus anything hand-written in ~/.ssh/config
-sys ssh NAME|Log in straight into tmux, like {{ssh NAME tmux}}
+sys ssh NAME|Log in to NAME: an ordinary prompt, like {{ssh NAME}}
 sys ssh harden|Keys only on this machine — optional, passwords stay on otherwise
 sys ssh harden tailnet|The same, but passwords still work over Tailscale
 sys ssh man|The manual
+|
+sys tmux|A short guide to tmux
+sys tmux list|The tmux sessions on this machine
+sys tmux NAME|Go into the session called NAME
 |
 sys nas|The NAS: how to reach it, its disk, shares and Tailscale
 sys nas open|Open the NAS's web page in the browser
@@ -432,6 +437,14 @@ case "$cmd" in
     ;;
 
 
+
+  tmux)
+    case "${ARGS[0]:-}" in
+      "")       tmux_guide ;;
+      list|ls)  tmux_list ;;
+      *)        tmux_attach "${ARGS[0]}" ;;
+    esac
+    ;;
 
   hostname)
     is_macos || die "macOS only."

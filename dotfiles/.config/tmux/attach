@@ -2,8 +2,8 @@
 # Attach this login to a tmux session that no other connection is using, or
 # start a new one. Given a NAME, attach the session called NAME instead,
 # starting it if there is none. Used by `ssh HOST tmux [NAME]` (the wrapper in
-# ~/.config/tmux/ssh.sh) and by `sys ssh HOST`. A plain `ssh HOST` does not
-# use it: that is an ordinary prompt.
+# ~/.config/tmux/ssh.sh). A plain `ssh HOST`, and `sys ssh HOST`, do not use
+# it: those are an ordinary prompt.
 #
 # Why "no other connection": each terminal tab gets a session of its own, and a
 # tab whose connection dropped gets its session back, because that is the one

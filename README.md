@@ -33,9 +33,12 @@ it finishes it opens a fresh shell with the new config loaded.
 | `sys ssh` | The machines sys manages, and whether each is reachable right now |
 | `sys ssh all` | The same, plus anything hand-written in `~/.ssh/config` |
 | `sys ssh man` | The manual |
-| `sys ssh NAME` | Log in straight into tmux, like `ssh NAME tmux` |
+| `sys ssh NAME` | Log in to NAME: an ordinary prompt, like `ssh NAME` |
 | `sys ssh harden` | Keys only on this machine — optional; passwords stay on otherwise |
 | `sys ssh harden tailnet` | The same, but passwords still work over Tailscale |
+| `sys tmux` | A short guide to tmux |
+| `sys tmux list` | The tmux sessions on this machine |
+| `sys tmux NAME` | Go into the session called NAME |
 | `sys nas` | The NAS: how to reach it, its disk, shares and Tailscale |
 | `sys nas open` | Open the NAS's web page |
 | `sys tailscale up` | Turn Tailscale on here, then on every machine this one may log into |
@@ -125,7 +128,7 @@ You choose when you connect:
 | `ssh mini` | An ordinary prompt |
 | `ssh mini tmux` | A tmux session no other connection is using, or a new one |
 | `ssh mini tmux work` | The session called `work`, started if there is none |
-| `sys ssh mini` | The same as `ssh mini tmux` |
+| `sys ssh mini` | An ordinary prompt too |
 
 In tmux, close the lid, lose signal, or quit the app: the session keeps
 running on the machine, and the next `ssh mini tmux` picks it up exactly where
@@ -145,13 +148,17 @@ pass to `ssh` goes to the real one untouched. The session rule is
 All three reach the Ubuntu box as shared dotfiles.
 
 Already at a prompt on the machine — say from a phone app, which does not use
-your shell's `ssh` — use tmux itself:
+your shell's `ssh`:
 
 | | |
 |---|---|
-| `tmux ls` | List the sessions running on this machine |
-| `tmux attach -t frame` | Go into the session called `frame` |
-| `tmux` | Start a new session |
+| `sys tmux list` | List the sessions running on this machine |
+| `sys tmux frame` | Go into the session called `frame` |
+| `sys tmux` | A short guide: starting sessions, and the keys inside one |
+
+`sys tmux NAME` only goes into a session that exists; a mistyped name is an
+error, not a new session. Inside tmux it switches you to the other session.
+Plain `tmux` is untouched: it starts a new session, as it always does.
 
 ## Claude sessions that come back after a restart
 
@@ -166,7 +173,7 @@ dwkns-mini | frame        | ~/Developer/Frame   | Frame - Main
 At every login — which is what a restart ends in on the mini, since it logs in
 by itself — a LaunchAgent runs `bin/claude-sessions`. For each line naming this
 machine it starts a tmux session in that folder and resumes the conversation
-with that title, the one `/rename` gave it. `tmux attach -t frame` on the
+with that title, the one `/rename` gave it. `sys tmux frame` on the
 mini, or `ssh mini tmux frame` from elsewhere, goes into it.
 
 A session that already exists is left alone, so running `claude-sessions` by
@@ -213,6 +220,7 @@ lib/sync.sh                  mirrors config between repo and system
 lib/setup.sh                 brew, mise, App Store, macOS, the Dock
 lib/ssh.sh                   SSH keys, access and aliases from config/ssh/access (run by sync)
 lib/tailscale.sh             `sys tailscale up` — Tailscale on here and on the machines this one can log into
+lib/tmux.sh                  `sys tmux` — a guide, the sessions here, and going into one
 bin/ssh-access               the one command for a machine that does not run sys
 bin/ssh-reach                Tailscale name or NAME.local? the aliases ask this
 bin/ai-brief                 `sys ai` — the repo explained, generated from the repo

@@ -102,6 +102,7 @@ state is carried by the status next to it, not by dimming the command.
 | `lib/net.sh` | `sys net` — network shares from `config/net`, mounted through Finder |
 | `lib/nas.sh` | `sys nas` — the NAS's reachability, disk, shares and Tailscale, from `config/nas` |
 | `lib/tailscale.sh` | `sys tailscale up` — Tailscale on here, then on every machine this one may log into |
+| `lib/tmux.sh` | `sys tmux` — a guide, `sys tmux list`, and `sys tmux NAME` to go into a session |
 | `bin/ai-brief` | `sys ai` — this file's companion, generated: commands, config, machines, state |
 | `bin/claude-sessions` | Starts the Claude Code sessions in `config/claude-sessions` in tmux. Run at login by a LaunchAgent |
 | `docs/ubuntu-box.md` | How the Ubuntu box was built — vendor repos `sys` does not manage |
@@ -483,11 +484,24 @@ never see it — keep it that narrow. It runs `ssh -t HOST 'bash
 ~/.config/tmux/attach [NAME]'`; `-t` because ssh gives a command no terminal
 and tmux will not start without one. `attach` picks the session: NAME if given
 (`new-session -A`), else the first one with no client attached, else a new one.
-`ssh_connect` (`sys ssh HOST`) calls the same rule. From a prompt already on
-the machine the user types tmux's own commands (`tmux ls`, `tmux attach -t
-NAME`, `tmux`). The file also defined a `t [NAME]` / `t list` shortcut for
-that, 3–14 November 2026; it was removed because a second way into tmux, with
-a different rule from `tmux` itself, was confusing. Do not add it back.
+`sys ssh HOST` (`ssh_connect`) does *not* use it: it is a plain login, at the
+user's request, having gone straight into tmux until 14 November 2026.
+
+**`sys tmux`** (`lib/tmux.sh`) is the user's chosen way into tmux from a prompt
+already on the machine: no argument prints a guide, `list` shows the sessions,
+anything else is a session name to go into. It only attaches to a session that
+exists, matched exactly (`-t "=NAME"`; without the `=` tmux takes `fr` to mean
+`frame`), and inside tmux it runs `switch-client`, because attaching would nest.
+It never creates a session and plain `tmux` is left alone. The ssh file also
+defined a `t [NAME]` / `t list` shortcut, 3–14 November 2026; it was removed as
+one way into tmux too many. Do not add it back, and do not add another.
+
+Testing it from an assistant's shell has two traps. That shell has no `TERM`,
+so an attach fails with "terminal does not support clear": give it one and a
+pty (`TERM=xterm-256color script -q /dev/null bin/sys tmux NAME`, with stdin
+held open). And `switch-client` typed into a pane with *no* client attached
+falls back to the most recently used client, which is the user's own terminal:
+attach a test client to the test session first, or their screen jumps.
 
 **Claude sessions after a restart.** `config/claude-sessions` is `machine |
 tmux session | folder | conversation title`. `bin/claude-sessions` acts only on

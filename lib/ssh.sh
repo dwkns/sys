@@ -407,27 +407,21 @@ ssh_apply() {
   return 0
 }
 
-# `sys ssh NAME`: log in and attach a session nobody else is using, so losing the
-# connection costs nothing — tmux keeps the session running on the machine and
-# you pick it up where you left it. Takes the alias or the full machine name.
+# `sys ssh NAME`: log in to a machine by its alias or its full name. An
+# ordinary prompt, exactly what `ssh NAME` gives — it logged straight into tmux
+# until November 2026, and that was one way into tmux too many. To land in a
+# session, `ssh NAME tmux [SESSION]` from here, or `sys tmux SESSION` once there.
 ssh_connect() {
-  local want="$1" m a found="" remote
+  local want="$1" m a found=""
   while read -r m _; do
     [[ "$m" == "$want" || "$(ssh_alias "$m")" == "$want" ]] && { found="$m"; break; }
   done < <(ssh_access_lines)
   [[ -n "$found" ]] || die "No machine called $want in config/ssh/access — {{sys ssh}} lists them"
   a="$(ssh_alias "$found")"
 
-  # Through a login shell: a non-interactive ssh command gets a bare PATH, so
-  # Homebrew's tmux would look missing and this would quietly hand back a
-  # plain shell. No tmux there at all? Then a login shell, not an error.
-  # The session is picked by ~/.config/tmux/attach, the same rule `ssh HOST tmux`
-  # uses; a machine not synced since that file arrived gets `main`.
-  remote='exec bash -lc '"'"'command -v tmux >/dev/null 2>&1 || exec "$SHELL" -l; [ -r ~/.config/tmux/attach ] && exec bash ~/.config/tmux/attach; exec tmux new -A -s main'"'"''
+  if [[ "${DRY_RUN:-0}" == "1" ]]; then note "dry run: ssh $a"; return 0; fi
 
-  if [[ "${DRY_RUN:-0}" == "1" ]]; then note "dry run: connect to $a and attach tmux"; return 0; fi
-
-  exec ssh -t "$a" "$remote"
+  exec ssh "$a"
 }
 
 # Lock sshd to keys only. Refuses until at least one key is let in here, so a

@@ -109,5 +109,5 @@ while IFS='|' read -r name dir title; do
   fi
 done <<<"$mine"
 
-[[ "$started" -gt 0 ]] && ok "Started $started — {{tmux attach -t NAME}} goes into one, {{tmux ls}} lists them"
+[[ "$started" -gt 0 ]] && ok "Started $started — {{sys tmux NAME}} goes into one, {{sys tmux list}} lists them"
 exit $rc

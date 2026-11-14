@@ -11,8 +11,8 @@
 # gives a command no terminal, and tmux will not start without one. The
 # session is picked on HOST by ~/.config/tmux/attach.
 #
-# At a prompt you are already at, use tmux itself: `tmux ls` lists the
-# sessions, `tmux attach -t NAME` goes into one, `tmux` starts a new one.
+# At a prompt you are already at: `sys tmux list` lists the sessions,
+# `sys tmux NAME` goes into one, and `sys tmux` is a short guide to the rest.
 #
 # Installed by sys from ~/.sys/dotfiles/.config/tmux/ssh.sh.
 

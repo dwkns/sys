@@ -4,8 +4,8 @@
 #   machine | tmux session | folder | conversation to resume
 #
 # machine       only that machine starts the line; the others ignore it
-# tmux session  the name you attach with: `tmux attach -t frame` on the
-#               machine, or `ssh mini tmux frame` from another
+# tmux session  the name you go into it by: `sys tmux frame` on the machine,
+#               or `ssh mini tmux frame` from another
 # folder        where claude runs
 # conversation  the title of the conversation to resume, as /rename set it.
 #               Leave it empty to resume whichever was used last in the folder.
