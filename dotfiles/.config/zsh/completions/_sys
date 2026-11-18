@@ -56,7 +56,7 @@ _sys() {
     tmux)
       # The sessions running here, read live, and the one sub-command.
       items=( 'list:the tmux sessions on this machine'
-              'claude:start the Claude sessions that should always be running'
+              'claude:start the Claude sessions that should always be running (claude fresh: new Remote Control identity)'
               ${(f)"$(tmux list-sessions -F '#{session_name}' 2>/dev/null)"} )
       _describe -t sessions 'tmux session' items
       ;;

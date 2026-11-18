@@ -531,6 +531,32 @@ server; and `LANG`, because a launchd job has no locale and tmux would draw
 ASCII. Test it through launchd, not from an assistant's shell: a tmux server
 started there inherits that shell's environment for every later session.
 
+**Remote Control identities** (learned 18 November 2026, by reading the
+desktop app's cached sidebar code and its saved state, not from documentation).
+Each session is started with `--remote-control "TITLE"`. A resumed
+conversation reuses the identity stored in its transcript (the last
+`"type":"bridge-session"` record, `bridgeSessionId`), and that matters:
+- The desktop app files a Remote Control row under "No folder" when it holds
+  no repository information for that session. Identities made before the
+  session moved into tmux had none; ones made by the tmux session do.
+- If the app holds a local row with the same `bridgeSessionIds` and that row
+  is archived, the identity stays archived: the tmux session is thrown off
+  with code 4090 on every reconnect and never reappears in the sidebar.
+  Archiving a live row therefore breaks the session on every device.
+- The sidebar has automatic per-project folders (icon on the header) and
+  hand-made groups (icon on each row). A row dragged into a hand-made group
+  looks different; that is not a fault.
+The cure for both faults is a new identity: `sys tmux claude fresh [NAME]`
+(`fresh_one` in `bin/claude-sessions`). There is no flag for it, so it drives
+the `/remote-control` menu with `send-keys` and reads the pane to check each
+step. It cannot do the session it is run from inside. If the menu's wording
+changes it stops rather than guess — update the strings it greps for.
+The app's state, for next time: `~/Library/Application Support/Claude/`
+`claude-code-sessions/*/*/local_*.json` (local rows, `isArchived`,
+`bridgeSessionIds`) and the sidebar store in `Local Storage/leveldb`
+(`customGroupsByScope`). `~/.claude/sessions/PID.json` gives each running
+CLI's name and `bridgeSessionId`. Read them; do not edit them.
+
 **A new command or setup step.** Add the `case` branch in `bin/sys`, bump
 `TOTAL` if it is a numbered setup step, and update **both** `README.md` and
 `man/man1/sys.1` plus the usage text. Those three drift easily; check them

@@ -50,6 +50,7 @@ sys tmux|A short guide to tmux
 sys tmux list|The tmux sessions on this machine
 sys tmux NAME|Go into the session called NAME
 sys tmux claude|Start the Claude sessions that should always be running
+sys tmux claude fresh|Give them a new Remote Control identity; add a NAME for just one
 |
 sys nas|The NAS: how to reach it, its disk, shares and Tailscale
 sys nas open|Open the NAS's web page in the browser
@@ -443,7 +444,7 @@ case "$cmd" in
     case "${ARGS[0]:-}" in
       "")       tmux_guide ;;
       list|ls)  tmux_list ;;
-      claude)   tmux_claude ;;
+      claude)   tmux_claude "${ARGS[1]:-}" "${ARGS[2]:-}" ;;
       *)        tmux_attach "${ARGS[0]}" ;;
     esac
     ;;

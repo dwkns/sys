@@ -40,6 +40,7 @@ it finishes it opens a fresh shell with the new config loaded.
 | `sys tmux list` | The tmux sessions on this machine |
 | `sys tmux NAME` | Go into the session called NAME |
 | `sys tmux claude` | Start the Claude sessions that should always be running, wherever they live |
+| `sys tmux claude fresh` | Give those sessions a new Remote Control identity; `fresh NAME` for one |
 | `sys nas` | The NAS: how to reach it, its disk, shares and Tailscale |
 | `sys nas open` | Open the NAS's web page |
 | `sys tailscale up` | Turn Tailscale on here, then on every machine this one may log into |
@@ -189,6 +190,20 @@ last login is in `~/Library/Logs/claude-sessions.log`.
 
 These sessions have nobody attached, so a plain `ssh mini tmux` (no name) lands
 in the first of them rather than starting a fresh one.
+
+**If a session is missing from the Claude apps, or sits under "No folder".**
+Its Remote Control identity is a stale one: made before the session lived in
+tmux, or tied to a row that was archived. `sys tmux claude fresh NAME` ends
+that identity and makes a new one named after the conversation (`sys tmux
+claude fresh` does every session). The conversation is untouched. The old row
+in the apps is then dead and safe to archive; the new one files itself in the
+project's folder. A session that is busy is left alone, and so is the one you
+run the command from inside: there, type `/remote-control`, choose
+Disconnect, then `/remote-control TITLE`.
+
+Never archive the live row of a session in the desktop app: that ends its
+Remote Control from every device, and the tmux session is thrown off (code
+4090) each time it reconnects, until it is given a fresh identity.
 
 ## Starting over
 

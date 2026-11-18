@@ -6,6 +6,8 @@
 #   claude-sessions            start whichever are not already running
 #   sys tmux claude            the same, on whichever machine the list names
 #   claude-sessions --dry-run  say what would be started, start nothing
+#   claude-sessions --fresh [NAME]   give running sessions a new Remote Control
+#                              identity (all of them, or the one called NAME)
 #
 # A tmux session that already exists is left alone, whatever is in it, so this
 # is safe to run at any time. Run at login by the LaunchAgent in
@@ -23,7 +25,16 @@ _self="${BASH_SOURCE[0]}"
 export ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "$_self")/.." && pwd -P)}"
 source "$ROOT_DIR/lib/common.sh"
 
-[[ "${1:-}" == "--dry-run" || "${1:-}" == "--dryrun" ]] && DRY_RUN=1
+FRESH=0 ONLY=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run|--dryrun) DRY_RUN=1 ;;
+    --fresh) FRESH=1 ;;
+    -*) echo "claude-sessions: unknown option $1" >&2; exit 2 ;;
+    *)  ONLY="$1" ;;
+  esac
+  shift
+done
 LIST="$ROOT_DIR/config/claude-sessions"
 [[ -r "$LIST" ]] || { note "No config/claude-sessions — nothing to start"; exit 0; }
 
@@ -43,6 +54,69 @@ mine="$(sed 's/#.*//' "$LIST" | awk -F'|' -v me="$me" '
 [[ -n "$mine" ]] || exit 0          # another machine's list: say nothing
 
 has_cmd tmux || { error "tmux is not installed — {{brew install tmux}}"; exit 1; }
+
+# --fresh: end a session's Remote Control identity and make a new one, named
+# after its conversation. A resumed conversation goes on using the identity
+# stored in its transcript, and one made before the session lived here (in the
+# desktop app, or by an older claude) can be one the apps file wrongly: under
+# "No folder", or hidden behind a row that was archived, which also gets it
+# thrown off again and again with code 4090. A new identity made by this
+# session is filed properly. There is no flag for it, so this types what a
+# person would: /remote-control, Disconnect, then /remote-control TITLE. It
+# checks the menu is the one it expects before pressing Enter, and leaves a
+# session alone if it is busy, or is the one this command is running inside.
+fresh_one() {
+  local name="$1" title="$2" t="=$1:" inside screen
+  tmux has-session -t "=$name" 2>/dev/null || { note "$name: not running — {{sys tmux claude}} starts it"; return 0; }
+  inside="$( [[ -n "${TMUX:-}" ]] && tmux display-message -p '#{session_name}' 2>/dev/null )"
+  if [[ "$inside" == "$name" ]]; then
+    warn "$name: this command is running inside that session, so it cannot retype its own prompt"
+    note "There, type {{/remote-control}}, choose Disconnect, then {{/remote-control $title}}"
+    return 1
+  fi
+  [[ "$(tmux display-message -p -t "$t" '#{pane_current_command}')" == claude* ]] \
+    || { warn "$name: claude is not what is running there — left alone"; return 1; }
+  screen="$(tmux capture-pane -p -t "$t" | grep -v '^[[:space:]]*$' | tail -6)"
+  if printf '%s' "$screen" | grep -q 'esc to interrupt' || ! printf '%s' "$screen" | grep -q '^❯'; then
+    warn "$name: busy, or not at its prompt — left alone, try again when it is idle"; return 1
+  fi
+  if [[ "${DRY_RUN:-0}" == "1" ]]; then note "dry run: $name would get a new Remote Control identity called \"$title\""; return 0; fi
+
+  doing "$name: new Remote Control identity"
+  tmux send-keys -t "$t" '/remote-control' Enter; sleep 3
+  tmux send-keys -t "$t" Up Up; sleep 1
+  screen="$(tmux capture-pane -p -t "$t")"
+  if printf '%s' "$screen" | grep -q '❯ Disconnect this session'; then
+    tmux send-keys -t "$t" Enter; sleep 4
+  elif printf '%s' "$screen" | grep -q 'Disconnect this session'; then
+    tmux send-keys -t "$t" Escape
+    error "$name: the Remote Control menu was not laid out as expected — nothing changed"; return 1
+  else
+    # No menu: Remote Control was off, and that command has just turned it on.
+    # Fall through and name it.
+    :
+  fi
+  tmux send-keys -t "$t" "/remote-control $title" Enter; sleep 8
+  if tmux capture-pane -p -t "$t" | grep -q 'remote-control is active'; then
+    ok "$name: connected as \"$title\""
+  else
+    error "$name: Remote Control did not come back — look with {{sys tmux $name}}"; return 1
+  fi
+}
+
+if [[ "$FRESH" == "1" ]]; then
+  rc=0 hit=0
+  while IFS='|' read -r name dir title; do
+    [[ -n "$name" ]] || continue
+    [[ -z "$ONLY" || "$ONLY" == "$name" ]] || continue
+    hit=1
+    [[ -n "$title" ]] || { warn "$name: no conversation title in the list to name it by — left alone"; rc=1; continue; }
+    fresh_one "$name" "$title" || rc=1
+  done <<<"$mine"
+  [[ "$hit" == "1" ]] || { error "No session called $ONLY in config/claude-sessions"; exit 1; }
+  [[ "${DRY_RUN:-0}" == "1" || "$rc" != "0" ]] || note "The old rows in the Claude apps are dead now: archive those, not the new ones"
+  exit $rc
+fi
 
 # The id of the newest conversation in a folder carrying this title. Claude
 # keeps one transcript per conversation under ~/.claude/projects/<folder with

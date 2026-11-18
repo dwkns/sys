@@ -64,7 +64,15 @@ tmux_attach() {
 # safe at any time. The login LaunchAgent does the same thing after a restart;
 # this is for when you want them back without one.
 tmux_claude() {
-  local list="$ROOT_DIR/config/claude-sessions" me machines m a rc=0
+  local list="$ROOT_DIR/config/claude-sessions" me machines m a rc=0 extra=""
+  # `sys tmux claude fresh [NAME]`: a new Remote Control identity for running
+  # sessions instead of starting missing ones. See bin/claude-sessions.
+  if [[ "${1:-}" == "fresh" ]]; then
+    case "${2:-}" in *[!A-Za-z0-9_-]*) die "A tmux session name is letters, digits, - and _ only" ;; esac
+    extra="--fresh ${2:-}"
+  elif [[ -n "${1:-}" ]]; then
+    die "Unknown: sys tmux claude $1 — {{sys tmux claude}} or {{sys tmux claude fresh [NAME]}}"
+  fi
   [[ -r "$list" ]] || die "No config/claude-sessions in the repo"
   me="$(ssh_machine)"
   machines="$(sed 's/#.*//' "$list" | awk -F'|' 'NF >= 3 { gsub(/[ \t]/, "", $1); if ($1 != "" && !seen[$1]++) print $1 }')"
@@ -72,7 +80,7 @@ tmux_claude() {
 
   for m in $machines; do
     if [[ "$m" == "$me" ]]; then
-      "$ROOT_DIR/bin/claude-sessions" || rc=1        # DRY_RUN reaches it through the environment
+      "$ROOT_DIR/bin/claude-sessions" $extra || rc=1  # DRY_RUN reaches it through the environment
       continue
     fi
     a="$(ssh_alias "$m")"
@@ -86,7 +94,7 @@ tmux_claude() {
     fi
     # -t so the output there is drawn as it would be at its own prompt.
     if ssh -t -o BatchMode=yes -o ConnectTimeout=8 "$a" \
-         "test -x ~/.sys/bin/claude-sessions || { echo 'claude-sessions is not installed here: run sys sync on it'; exit 99; }; DRY_RUN=${DRY_RUN:-0} exec ~/.sys/bin/claude-sessions"; then
+         "test -x ~/.sys/bin/claude-sessions || { echo 'claude-sessions is not installed here: run sys sync on it'; exit 99; }; DRY_RUN=${DRY_RUN:-0} exec ~/.sys/bin/claude-sessions $extra"; then
       :
     else
       [[ $? == 99 ]] || warn "$a: some sessions did not start (see above)"
@@ -109,6 +117,7 @@ tmux_guide() {
 sys tmux list^The sessions on this machine
 sys tmux NAME^Go into the session called NAME
 sys tmux claude^Start the Claude sessions that should always be running
+sys tmux claude fresh^Give them a new Remote Control identity ({{fresh NAME}} for one)
 tmux new -s NAME^Start a new session called NAME
 tmux^Start a new session, named with a number
 ^

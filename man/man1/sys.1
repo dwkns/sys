@@ -213,6 +213,17 @@ on whichever machine the list names: here, or over ssh from a machine that
 may log in there. Sessions already running are left alone. The same thing
 happens by itself at login; this brings them back without a restart.
 .TP
+.BR "tmux claude fresh" " [" \fISESSION\fR ]
+Give the running Claude sessions, or just SESSION, a new Remote Control
+identity named after the conversation: the fix for a session that is missing
+from the Claude apps or filed under "No folder". It types
+.BR /remote\-control ,
+Disconnect, then
+.B /remote\-control TITLE
+into the session, checking the menu first. A busy session is left alone, as is
+the one the command is run from inside. The old row in the apps is then dead
+and safe to archive.
+.TP
 .BI "tmux " SESSION
 Go into the session called SESSION. It must exist, and the name must match
 exactly: a mistyped name is an error, not a new session. Inside tmux it
