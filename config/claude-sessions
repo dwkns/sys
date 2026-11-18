@@ -15,5 +15,5 @@
 dwkns-mini | frame        | ~/Developer/Frame        | Frame - Main
 dwkns-mini | lifts        | ~/Developer/lifts        | Lifts - Main
 dwkns-mini | youpods      | ~/Developer/youpods      | YouPods - Main
-dwkns-mini | screenviewer | ~/Developer/ScreenViewer | VNC app prompt
-dwkns-mini | sys          | ~/.sys                   | SSH access across machines
+dwkns-mini | screenviewer | ~/Developer/ScreenViewer | ScreenViewer - Main
+dwkns-mini | sys          | ~/.sys                   | sys - Main

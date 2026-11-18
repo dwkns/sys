@@ -174,7 +174,9 @@ dwkns-mini | frame        | ~/Developer/Frame   | Frame - Main
 At every login — which is what a restart ends in on the mini, since it logs in
 by itself — a LaunchAgent runs `bin/claude-sessions`. For each line naming this
 machine it starts a tmux session in that folder and resumes the conversation
-with that title, the one `/rename` gave it. `sys tmux frame` on the
+with that title, the one `/rename` gave it, with Remote Control on
+(`--remote-control`) so it is listed in the Claude apps on every other device.
+`sys tmux frame` on the
 mini, or `ssh mini tmux frame` from elsewhere, goes into it.
 
 To bring them back without a restart, `sys tmux claude`. It runs the same

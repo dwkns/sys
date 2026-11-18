@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Start the Claude Code sessions listed in config/claude-sessions, each in a
-# tmux session of its own, resuming the conversation named there.
+# tmux session of its own, resuming the conversation named there with Remote
+# Control on, so it appears in the Claude apps on every other device.
 #
 #   claude-sessions            start whichever are not already running
 #   sys tmux claude            the same, on whichever machine the list names
@@ -97,6 +98,16 @@ while IFS='|' read -r name dir title; do
     else
       warn "$name: no conversation called \"$title\" in $dir — resuming the last one used instead"
     fi
+  fi
+
+  # Remote Control is what lists the session on every other device signed in
+  # to the account; without it the session shows on this machine only. Named
+  # after the conversation when that was found, so the list shows its title.
+  if [[ "$cmd" == "claude --resume "* ]]; then
+    printf -v rc_name '%q' "$title"
+    cmd="$cmd --remote-control $rc_name"
+  else
+    cmd="$cmd --remote-control"
   fi
 
   if [[ "${DRY_RUN:-0}" == "1" ]]; then
