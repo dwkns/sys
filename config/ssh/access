@@ -8,8 +8,12 @@
 #
 # dwkns-iphone is Termius on the phone. It only logs in, so it has no line of
 # its own: just its public key in keys/dwkns-iphone.pub, added by hand.
+#
+# codebot is the Grok Bot assistant's computer. It only logs in, over the
+# tailnet, so it has no line of its own: its public key is keys/codebot.pub,
+# added by hand. It may reach dwkns-mini, dwkns-ubuntu and dwkns-nas.
 
 dwkns-m5         dwkns     dwkns-mini  dwkns-iphone
-dwkns-mini       dwkns     dwkns-m5  dwkns-iphone
-dwkns-ubuntu     admin     dwkns-m5  dwkns-mini  dwkns-iphone
-dwkns-nas        dwkns     dwkns-m5  dwkns-mini  dwkns-iphone
+dwkns-mini       dwkns     dwkns-m5  dwkns-iphone  codebot
+dwkns-ubuntu     admin     dwkns-m5  dwkns-mini  dwkns-iphone  codebot
+dwkns-nas        dwkns     dwkns-m5  dwkns-mini  dwkns-iphone  codebot
