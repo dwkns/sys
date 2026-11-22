@@ -341,10 +341,12 @@ which on Linux does the repo update and SSH access only. If that machine cannot
 push (no `gh`), `ssh_share_key` prints its public keys and asks for them to be
 pasted in on a Mac instead of leaving untracked files behind.
 
-**A device that only logs in** (Termius on the phone, `dwkns-iphone`): its
-public key goes in `config/ssh/keys/NAME.pub` by hand, and NAME in the "from"
-column. No line of its own — column 1 is only for machines that are logged
-into, and `ssh_prefix`, the aliases and `sys ssh` read column 1 only.
+**A device that only logs in** (Termius on the phone, `dwkns-iphone`, and
+`codebot`, the Grok Bot assistant's computer on the tailnet): its public key
+goes in `config/ssh/keys/NAME.pub` by hand, and NAME in the "from" column. No
+line of its own — column 1 is only for machines that are logged into, and
+`ssh_prefix`, the aliases and `sys ssh` read column 1 only. `codebot` is on
+the dwkns-mini, dwkns-ubuntu and dwkns-nas lines only.
 
 **Renaming a machine.** The name is the hostname, so the order matters, and
 the machine must stay reachable throughout (by LAN IP if nothing else — a
@@ -729,6 +731,7 @@ trust the command over the sentence.
 | `dwkns-ubuntu` | Ubuntu box, account `admin` | sync and SSH only | Screen broken; `docs/ubuntu-box.md` |
 | `dwkns-nas` | Synology | no (`config/ssh/no-sys`) | Keys pushed to it over ssh; `docs/nas.md` |
 | `dwkns-iphone` | Termius | no | Logs in only; key added by hand |
+| `codebot` | Grok Bot computer | no | Logs in only, over the tailnet; key added by hand. mini, ubuntu and nas |
 
 Old machine names still work as aliases through `config/ssh/old-names`.
 
