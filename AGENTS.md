@@ -11,6 +11,65 @@ the repo lives").
 
 ---
 
+## 0. Start here
+
+A handover in one file. Read in this order:
+
+1. Run `sys ai` (or `bin/ai-brief`). It is generated from the repo, so it is
+   never out of date: every command, every config file, the machines, the
+   local state, and whether this copy matches GitHub.
+2. This file, sections 1 and 5 before editing anything, then the recipe in
+   section 6 for the thing you were asked to change.
+3. Section 10, "State of play": what is running now, what is unfinished, what
+   has not been tested. It is dated; check it against the commands it gives.
+4. `README.md` only to see how the user is told things work.
+
+**What this is.** `sys` is one bash command that sets up and keeps in step the
+user's own machines: two Macs (`dwkns-mini`, an always-on Mac mini, and
+`dwkns-m5`, a laptop), an Ubuntu box, a Synology NAS, and a phone that only
+logs in. The repo is the configuration; a machine is a copy of it. `sys sync`
+applies the repo to a machine, `sys push` saves a machine's state to the repo.
+
+**The loop for any change.**
+
+1. Edit in `~/.sys` (the repo, not the copies under `~`).
+2. `bash -n` the file, run the command with `--dry-run`, then for real, and
+   read back what it wrote (section 7).
+3. Update `README.md`, `man/man1/sys.1`, the usage table in `bin/sys`, the
+   completion file and this file, whichever describe the behaviour (section 9).
+4. Commit and push **only when the user asks**. They normally do it
+   themselves with `sys push`, which commits everything as "Update config
+   files". Then `sys sync` on the other machines, or `sys sync all`.
+
+**Working with the user.** Stated by them, more than once:
+
+- They are not a programmer. Say what happened and what to do in plain words.
+- When they must type something, give every command in full, in order, in one
+  place. Never "as above", never a fragment to adapt. Fewer commands is better.
+- Run things yourself when you have a shell on the machine; do not hand them
+  commands you could have run.
+- Do not theorise at them. When something misbehaves, read the actual state or
+  code first, then say which statements are fact and which are inference.
+- Say the consequence before anything they cannot undo (archiving, deleting,
+  killing a session), and wait for a yes.
+- Passwords stay on for sshd unless they run `sys ssh harden` themselves.
+- One way to do a thing. Shortcuts were removed for being one too many
+  (`t`, auto-tmux on ssh); do not add aliases or alternatives unasked.
+
+**Where you are probably running.** Inside the tmux session called `sys` on
+`dwkns-mini`, as one of the Claude sessions this repo starts (section 6,
+"Claude sessions after a restart"). So:
+
+- never `tmux kill-server`, and never kill the `sys` session: it is you;
+- restart another session with `tmux kill-session -t NAME` then
+  `sys tmux claude`, one at a time, and only when asked;
+- `tmux switch-client` from your shell moves the *user's* screen (section 6);
+- you cannot click in the Claude desktop app. Sidebar changes are the user's
+  to make by hand, and its files under `~/Library/Application Support/Claude`
+  are read-only to you.
+
+---
+
 ## 1. Ground rules
 
 **The GitHub repo is public.** Never commit a secret. No licence files, no
@@ -102,9 +161,12 @@ state is carried by the status next to it, not by dimming the command.
 | `lib/net.sh` | `sys net` — network shares from `config/net`, mounted through Finder |
 | `lib/nas.sh` | `sys nas` — the NAS's reachability, disk, shares and Tailscale, from `config/nas` |
 | `lib/tailscale.sh` | `sys tailscale up` — Tailscale on here, then on every machine this one may log into |
-| `lib/tmux.sh` | `sys tmux` — a guide, `sys tmux list`, and `sys tmux NAME` to go into a session |
+| `lib/tmux.sh` | `sys tmux` — a guide, `list`, `NAME` to go into a session, and `claude [fresh [NAME]]`, which runs `bin/claude-sessions` here or over ssh |
 | `bin/ai-brief` | `sys ai` — this file's companion, generated: commands, config, machines, state |
-| `bin/claude-sessions` | Starts the Claude Code sessions in `config/claude-sessions` in tmux. Run at login by a LaunchAgent |
+| `bin/claude-sessions` | Starts the Claude Code sessions in `config/claude-sessions` in tmux. Run at login by a LaunchAgent. `--fresh [NAME]` gives running ones a new Remote Control identity |
+| `dotfiles/Library/LaunchAgents/com.dwkns.claude-sessions.plist` | Runs `bin/claude-sessions` at login |
+| `dotfiles/.config/tmux/ssh.sh` | The `ssh HOST tmux [NAME]` wrapper |
+| `dotfiles/.config/zsh/completions/_sys` | Tab completion for `sys` |
 | `docs/ubuntu-box.md` | How the Ubuntu box was built — vendor repos `sys` does not manage |
 | `docs/nas.md` | The Synology — accounts, shares, Time Machine, Tailscale, and their failure modes |
 | `man/man1/sys.1` | Man page. Keep in step with behaviour |
@@ -178,6 +240,17 @@ made/shared and how many machines are let in, whether sshd is keys-only, Dock
 matches config, desktop colour, whether Paywall Down is in `/Applications`,
 repo clean. Must never block — network calls go
 through `with_timeout`.
+
+### `sys ai`
+`bin/ai-brief`, Python, read-only. Builds its text from the usage table in
+`bin/sys`, the opening comment of each script and config file, and
+`config/ssh/access`. So a new script or config file needs a good first comment
+line, and a new command needs a usage line; nothing else keeps the brief right.
+
+### `sys tmux`, `sys ssh`, `sys net`, `sys nas`
+Described where their detail is: `sys ssh` in section 4; the rest in section 6
+under "tmux over ssh", "`sys tmux`", "Claude sessions after a restart",
+"Remote Control identities" and "A network share"; the NAS in `docs/nas.md`.
 
 ### `sys remove`
 Undoes what setup installed (Homebrew and its packages, mise toolchains, copied
@@ -606,6 +679,17 @@ Kept as a list because each one cost a debugging session.
   folder's `.DS_Store`. `FXPreferredViewStyle` only sets the view (`clmv`,
   `Nlsv`, `icnv`, `glyv`), and folders with their own saved view keep it.
 
+- `sys ssh NAME` over a bare PATH could not find tmux and silently gave a plain
+  shell. Later it was made a plain login on purpose. Check what a remote
+  command actually landed in.
+- A `switch-client` test moved the user's own terminal into a test session.
+- Days went on theories about why Claude sessions were missing or misfiled
+  in the desktop app (titles, folders, restarts, re-importing). The answer was
+  in the app's own cached code and saved state all along: section 6, "Remote
+  Control identities". Read the state first.
+- Archiving a sidebar row to tidy up took the live session down on every
+  device, because the archived row and the live session shared an identity.
+
 ---
 
 - **A frozen 1Password SSH agent hung every login, with nothing on screen.**
@@ -625,3 +709,81 @@ three describe it, in the same commit.
 Commit messages are one plain sentence saying what changed, with a body when the
 reason is not obvious. When an AI assistant commits, add the trailer its harness
 asks for.
+
+---
+
+## 10. State of play — 22 November 2026
+
+Dated on purpose. Everything here can be checked with the command beside it;
+trust the command over the sentence.
+
+**Repo.** `master`, level with GitHub at `f8f71ed` apart from this handover
+(`git status`, `sys ai`). `dwkns-mini` is where work happens.
+
+**Machines** (`sys ssh` shows reachability; `config/ssh/access` is the truth).
+
+| Machine | What | Runs sys | Notes |
+|---|---|---|---|
+| `dwkns-mini` | Mac mini, always on | yes | Hosts the Claude sessions. Alias `mini` |
+| `dwkns-m5` | MacBook Pro | yes | Often asleep. At `bbd5fad`, two commits behind: needs `sys sync` |
+| `dwkns-ubuntu` | Ubuntu box, account `admin` | sync and SSH only | Screen broken; `docs/ubuntu-box.md` |
+| `dwkns-nas` | Synology | no (`config/ssh/no-sys`) | Keys pushed to it over ssh; `docs/nas.md` |
+| `dwkns-iphone` | Termius | no | Logs in only; key added by hand |
+
+Old machine names still work as aliases through `config/ssh/old-names`.
+
+**Claude sessions on the mini** (`sys tmux list`, `sys tmux claude --dry-run`).
+The user's goal, met on 18 November: in the Claude desktop app, one folder per
+project with one session in each, every one running in tmux on the mini with
+Remote Control on, all looking the same.
+
+| tmux session | Folder | Conversation and Remote Control name |
+|---|---|---|
+| `frame` | `~/Developer/Frame` | Frame - Main |
+| `lifts` | `~/Developer/lifts` | Lifts - Main |
+| `youpods` | `~/Developer/youpods` | YouPods - Main |
+| `screenviewer` | `~/Developer/ScreenViewer` | ScreenViewer - Main |
+| `sys` | `~/.sys` | sys - Main |
+
+- All five were given new Remote Control identities on 18 November (four by
+  the assistant's keystrokes, `sys` by the user's own), which is what fixed
+  "missing" and "No folder". A restart resumes each conversation and reuses
+  the identity in its transcript, so the fix should survive one.
+- To add or change one: edit `config/claude-sessions`, name the conversation
+  to match with `/rename` inside it, `sys tmux claude`.
+- The LaunchAgent is loaded (`launchctl list | grep claude-sessions`); its last
+  run is in `~/Library/Logs/claude-sessions.log`.
+
+**Not tested.**
+
+- A real restart of the mini since the list grew from three sessions to five
+  and since `--remote-control "TITLE"` was added to the start command. The
+  last logged login run is 14 November, with three.
+- `sys tmux claude fresh` end to end. Its dry run, its error paths and the
+  plain start path were run; the keystrokes it sends are the ones done by hand
+  on 18 November. It depends on the wording of Claude Code's `/remote-control`
+  menu ("Disconnect this session", "remote-control is active").
+- `sys tmux claude` from the laptop since `fresh` was added (m5 was asleep).
+
+**Open, none urgent.**
+
+- `sys sync` on `dwkns-m5`, or `sys sync all` from the mini when it is awake.
+- `~/.claude/sessions/PID.json` still names the `sys` session "SSH access
+  across machines", though its transcript and Remote Control name are
+  "sys - Main". Cosmetic as far as is known; the start script reads the
+  transcript. Likely gone after the session next restarts (inference).
+- The `~/.system-config` link and the old-path branch in `ssh_sync_others` can
+  be removed once every machine has synced from `~/.sys` (section 5).
+- If the desktop app's sidebar misbehaves again: do not use its "Import Claude
+  Code CLI sessions", which may make duplicate local rows, and do not archive a
+  row that belongs to a live session. Use `sys tmux claude fresh NAME`, then
+  archive only the old, dead row.
+
+**Things that look wrong and are not.**
+
+- A row the user dragged into a hand-made sidebar group shows its icon on the
+  row, not on the folder header.
+- `sys tmux claude` printing "already running — left alone" for everything.
+- `sys sync` printing "Already up to date — nothing to apply".
+- `tmux list` showing `claude` panes with no client attached: the user reaches
+  them through the Claude apps, not the terminal.
