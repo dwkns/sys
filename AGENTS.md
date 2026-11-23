@@ -566,7 +566,11 @@ user's request, having gone straight into tmux until 14 November 2026.
 already on the machine: no argument prints a guide, `list` shows the sessions,
 anything else is a session name to go into. It only attaches to a session that
 exists, matched exactly (`-t "=NAME"`; without the `=` tmux takes `fr` to mean
-`frame`), and inside tmux it runs `switch-client`, because attaching would nest.
+`frame`). Keep the quotes, in code and in anything the user is told to type:
+their shell is zsh, where a bare word starting with `=` means "the path of
+this command", so `tmux attach -t =frame` fails with "frame not found" before
+tmux ever runs. Checked 23 November 2026: every `=` target in the repo is
+quoted, and all of them are in bash scripts, and inside tmux it runs `switch-client`, because attaching would nest.
 It never creates a session and plain `tmux` is left alone. `list`, `ls` and
 `claude` are taken, so a session cannot be reached by those names. The ssh file also
 defined a `t [NAME]` / `t list` shortcut, 3–14 November 2026; it was removed as
@@ -714,7 +718,7 @@ asks for.
 
 ---
 
-## 10. State of play — 22 November 2026
+## 10. State of play — 23 November 2026
 
 Dated on purpose. Everything here can be checked with the command beside it;
 trust the command over the sentence.
@@ -747,8 +751,17 @@ Remote Control on, all looking the same.
 | `youpods` | `~/Developer/youpods` | YouPods - Main |
 | `screenviewer` | `~/Developer/ScreenViewer` | ScreenViewer - Main |
 | `sys` | `~/.sys` | sys - Main |
+| `millhouse` | `~/Developer/mill-house` | Mill House - Main |
 
-- All five were given new Remote Control identities on 18 November (four by
+- Mill House was added on 23 November. Its GitHub repo is
+  `dwkns/christmas-shopping`, to be renamed `dwkns/mill-house`. When it was
+  added its tmux session was waiting at Claude Code's "trust this folder?"
+  question and no conversation existed in the folder yet, so there was nothing
+  called "Mill House - Main" to resume. Until one is named that with
+  `/rename`, a restart resumes the last conversation used there and warns.
+  To check, look for a transcript carrying that title in
+  `~/.claude/projects/-Users-dwkns-Developer-mill-house/`.
+- The first five were given new Remote Control identities on 18 November (four by
   the assistant's keystrokes, `sys` by the user's own), which is what fixed
   "missing" and "No folder". A restart resumes each conversation and reuses
   the identity in its transcript, so the fix should survive one.
@@ -759,7 +772,7 @@ Remote Control on, all looking the same.
 
 **Not tested.**
 
-- A real restart of the mini since the list grew from three sessions to five
+- A real restart of the mini since the list grew from three sessions to six
   and since `--remote-control "TITLE"` was added to the start command. The
   last logged login run is 14 November, with three.
 - `sys tmux claude fresh` end to end. Its dry run, its error paths and the
